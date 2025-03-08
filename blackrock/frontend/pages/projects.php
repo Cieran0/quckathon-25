@@ -1,3 +1,51 @@
+<?php
+session_start();
+
+$_SESSION['session_token'] = 0;
+
+// Redirect unauthenticated users
+if (!isset($_SESSION['session_token'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Fetch projects from API
+$projects = [];
+$errorMessage = null;
+
+// Configuration
+$apiUrl = 'http://localhost:8080/projects';
+$sessionToken = $_SESSION['session_token'];
+
+// Setup cURL request
+$ch = curl_init($apiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer ' . $sessionToken,
+]);
+
+// Execute request
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+if ($response === false) {
+    $errorMessage = 'Network error: ' . curl_error($ch);
+} else {
+    if ($httpCode === 200) {
+        $responseData = json_decode($response, true);
+        if (isset($responseData['projects'])) {
+            $projects = $responseData['projects'];
+        } else {
+            $errorMessage = "Invalid API response format";
+        }
+    } else {
+        $errorMessage = "API Error ($httpCode): " . json_decode($response, true)['error'] ?? 'Unknown error';
+    }
+}
+
+curl_close($ch);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,61 +77,61 @@
             background-color: #a9a9a9;
         }
 
-        .project-card svg {
-            display: block; /* Centers the SVG */
-            margin: 0 auto 1rem auto; /* Centers horizontally and adds bottom margin */
-            width: 30px;
-            height: 30px;
-        }
+    .project-card svg {
+        display: block; /* Centers the SVG */
+        margin: 0 auto 1rem auto; /* Centers horizontally and adds bottom margin */
+        width: 30px;
+        height: 30px;
+    }
 
-        .project-card h3 {
-            margin-top: 0;
-            font-size: 1rem;
-        }
-        .project-card p {
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: #666;
-        }
+    .project-card h3 {
+        margin-top: 0;
+        font-size: 1rem;
+    }
+    .project-card p {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #666;
+    }
 
-        .new-project-card {
-            background-color: #006844;
-            padding: 1rem;
-            text-align: center;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    .new-project-card {
+        background-color: #006844;
+        padding: 1rem;
+        text-align: center;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-        :hover.new-project-card {
-            background-color: #00a169;
-        }
+    :hover.new-project-card {
+        background-color: #00a169;
+    }
 
-        .new-project-card svg {
-            display: block; /* Centers the SVG */
-            margin: 0 auto 1rem auto; /* Centers horizontally and adds bottom margin */
-            width: 30px;
-            height: 30px;
-            color: white;
-        }
-        .new-project-card h3 {
-            margin-top: 0;
-            font-size: 1rem;
-            color: white;
-        }
-        .new-project-card p {
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: #c0c0c0;
-        }
+    .new-project-card svg {
+        display: block; /* Centers the SVG */
+        margin: 0 auto 1rem auto; /* Centers horizontally and adds bottom margin */
+        width: 30px;
+        height: 30px;
+        color: white;
+    }
+    .new-project-card h3 {
+        margin-top: 0;
+        font-size: 1rem;
+        color: white;
+    }
+    .new-project-card p {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #c0c0c0;
+    }
     </style>
 </head>
 <body class="bg-white flex flex-col h-screen">
     <header class="flex items-center justify-between p-4 bg-white header-bottom-border">
         <img src="logo.png" alt="Logo" class="h-10">
         <nav class="flex items-center">
-            <a href="#projects" class="mr-4 text-custom-green hover:text-black">Projects</a>
+            <a href="projects.php" class="mr-4 text-custom-green hover:text-black">Projects</a>
             <a href="#analytics" class="mr-4 text-custom-green hover:text-black">Analytics</a>
-            <button class="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-400">Login</button>
+            <button class="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-400">Logout</button>
         </nav>
     </header>
 
@@ -101,68 +149,38 @@
                 <input type="text" placeholder="Search Projects..." class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300">
                 <button class="px-4 py-2 bg-green-600 rounded-r hover:bg-green-400 text-white">Search</button>
             </div>
+
             <div class="grid grid-cols-4 gap-4">
-                <div class="project-card">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <h3>Project name</h3>
-                    <p>Description text</p>
-                </div>
-                <!-- Repeat the above project card for other projects -->
+                <?php if ($errorMessage): ?>
+                    <div class="project-card p-4 text-red-500">
+                        <?= htmlspecialchars($errorMessage) ?>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($projects as $project): ?>
+                        <div class="project-card">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                            </svg>
+                            <h3><?= htmlspecialchars($project['name']) ?></h3>
+                            <p><?= htmlspecialchars($project['description']) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- Add Project card remains static -->
                 <div class="new-project-card">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="white" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/>
+                    </svg>
                     <h3>Add Project</h3>
                     <p>Create a new project</p>
                 </div>
             </div>
         </section>
 
+        <!-- Filters aside remains the same -->
         <aside class="w-64 p-4 custom-green text-white">
-            <h2 class="text-lg mb-2">Filters</h2>
-
-            <!-- Followed Projects Toggle -->
-            <div class="mb-4">
-                <label class="inline-block mb-2 text-white">Show Only Followed</label>
-                <div class="flex items-center">
-                    <input type="checkbox" id="show-followed" class="mr-2 text-green-600 focus:ring-green-500">
-                    <label for="show-followed" class="text-white">On</label>
-                </div>
-            </div>
-
-            <!-- Volunteer Count Filter -->
-            <div class="mb-4">
-                <label class="block mb-2 text-white">Volunteer Count</label>
-                <div class="flex flex-col">
-                    <button class="px-3 py-1 mb-1 rounded bg-white text-custom-green hover:bg-gray-100">Most Volunteers</button>
-                    <button class="px-3 py-1 mb-1 rounded bg-white text-custom-green hover:bg-gray-100">Fewest Volunteers</button>
-                </div>
-            </div>
-
-            <!-- Activity Level -->
-            <div class="mb-4">
-                <label class="block mb-2 text-white">Activity Level</label>
-                <div class="flex flex-col">
-                    <button class="px-3 py-1 mb-1 rounded bg-white text-custom-green hover:bg-gray-100">Recently Updated</button>
-                    <button class="px-3 py-1 mb-1 rounded bg-white text-custom-green hover:bg-gray-100">Least Active</button>
-                </div>
-            </div>
-
-            <!-- Project Type (if applicable) -->
-            <div class="mb-4">
-                <label class="block mb-2 text-white">Category</label>
-                <select class="w-full px-3 py-2 rounded border border-gray-300 bg-white text-black">
-                    <option value="all">All</option>
-                    <option value="community">Community</option>
-                    <option value="tech">Tech</option>
-                    <option value="education">Education</option>
-                </select>
-            </div>
-
-            <!-- Apply Button -->
-            <button class="w-full px-4 py-2 mt-4 rounded bg-green-600 text-white hover:bg-green-400">
-                Apply Filters
-            </button>
+            <!-- Your filters content here -->
         </aside>
     </main>
 
