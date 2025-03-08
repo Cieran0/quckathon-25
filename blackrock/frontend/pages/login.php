@@ -169,13 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
-    <header class="flex items-center justify-between p-4 bg-white header-bottom-border">
-        <img src="logo.png" alt="Logo" class="h-10">
-        <nav class="flex items-center">
-            <a href="#projects" class="mr-4 text-custom-green hover:text-black">Projects</a>
-            <a href="#analytics" class="mr-4 text-custom-green hover:text-black">Analytics</a>
-        </nav>
-    </header>
+    <?php include 'header.php'; ?>
 
     <div class="login-container">
         <form method="POST" action="login.php" class="login-form">
@@ -189,8 +183,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
 
-    <footer class="dark-gray text-white py-4 text-center">
-        <p class="text-sm">&copy; 2024 The Green Team. All rights reserved.</p>
-    </footer>
+    <?php include 'footer.php'; ?>
 </body>
 </html>

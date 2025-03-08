@@ -125,14 +125,7 @@ curl_close($ch);
     </style>
 </head>
 <body class="bg-white flex flex-col h-screen">
-    <header class="flex items-center justify-between p-4 bg-white header-bottom-border">
-        <img src="logo.png" alt="Logo" class="h-10">
-        <nav class="flex items-center">
-            <a href="projects.php" class="mr-4 text-custom-green hover:text-black">Projects</a>
-            <a href="#analytics" class="mr-4 text-custom-green hover:text-black">Analytics</a>
-            <form action="logout.php"><button type="submit" class="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-400">Logout</button></form>
-        </nav>
-    </header>
+    <?php include 'header.php'; ?>
 
     <main class="flex flex-grow">
         <aside class="w-64 p-4 custom-green text-white">
@@ -183,8 +176,6 @@ curl_close($ch);
         </aside>
     </main>
 
-    <footer class="dark-gray text-white py-4 text-center">
-        <p class="text-sm">&copy; 2024 The Green Team. All rights reserved.</p>
-    </footer>
+    <?php include 'footer.php'; ?>
 </body>
 </html>
