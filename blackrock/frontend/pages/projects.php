@@ -35,6 +35,7 @@ if ($response === false) {
             $projects = $responseData['projects'];
         } else {
             $errorMessage = "Invalid API response format";
+            $errorMessage = $response;
         }
     } else {
         $errorMessage = "API Error ($httpCode): " . json_decode($response, true)['error'] ?? 'Unknown error';
