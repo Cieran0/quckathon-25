@@ -134,7 +134,6 @@ $rootData = $responseData['folders'][0] ?? [];
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         /* Drag-and-Drop Upload Area Styles */
         .upload-area {
             width: 100%;
@@ -175,7 +174,6 @@ $rootData = $responseData['folders'][0] ?? [];
         <section class="flex-grow p-4">
             <!-- Dynamic folder view container -->
             <div id="folder-view"></div>
-
             <!-- Upload Area -->
             <div class="mt-8">
                 <h3 class="text-lg font-bold mb-4">Upload File</h3>
@@ -207,7 +205,6 @@ $rootData = $responseData['folders'][0] ?? [];
         const folderData = <?= json_encode($rootData) ?>;
         // Expose session token to JavaScript
         const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
-
         document.addEventListener('DOMContentLoaded', () => {
             let currentFolder = folderData; // Start with the root folder
             const navigationStack = [currentFolder]; // Track navigation history
@@ -374,17 +371,90 @@ $rootData = $responseData['folders'][0] ?? [];
                 e.preventDefault();
                 uploadArea.classList.add('dragover');
             });
+
             uploadArea.addEventListener('dragleave', () => {
                 uploadArea.classList.remove('dragover');
             });
-            uploadArea.addEventListener('drop', (e) => {
+
+            uploadArea.addEventListener('drop', async (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
+
                 const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    alert(`File dropped: ${files[0].name}`);
-                }
+                if (files.length === 0) return;
+
+                const file = files[0];
+                await handleFileUpload(file);
             });
+
+            // Handle File Upload
+            async function handleFileUpload(file) {
+    try {
+        // Debugging: Log the current folder and session token
+        console.log('Current Folder:', currentFolder);
+        console.log('Session Token:', sessionToken);
+
+        // Create FormData object and append required fields
+        const formData = new FormData();
+        formData.append('file', file); // The actual file being uploaded
+        formData.append('session_token', sessionToken); // Session token for authentication
+        formData.append('file_name', file.name); // Name of the file
+        formData.append('folder_id', currentFolder.id); // ID of the current folder
+        formData.append('project_id', <?php echo($id);?>); // ID of the project
+        formData.append('mime_type', file.type); // MIME type of the file
+
+        // Debugging: Log the FormData contents
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+
+        // Show loading feedback in the upload area
+        const uploadArea = document.getElementById('upload-area');
+        uploadArea.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="animate-spin h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 16v1a3 3 0 013 3h10a3 3 0 013-3v-1m-4-8l-4-4m0 0L8 8m4-4v12z"></path>
+            </svg>
+            <p>Uploading...</p>
+        `;
+
+        // Send the file to the backend
+        const response = await fetch('http://10.201.121.182:8000/upload', {
+            method: 'POST',
+            body: formData,
+        });
+
+        // Check if the response is successful
+        if (!response.ok) {
+            const errorText = await response.text(); // Get error details from the backend
+            throw new Error(`Upload failed with status ${response.status}: ${errorText}`);
+        }
+
+        // Parse the JSON response
+        const result = await response.json();
+
+        // Notify the user of success
+        alert(`Upload successful! File ID: ${result.file_id}, Version: ${result.version_number}`);
+
+        // Refresh the folder view to reflect the new file
+        renderFolder(currentFolder);
+
+    } catch (error) {
+        // Log the error and notify the user
+        console.error('Upload error:', error);
+        alert('Upload failed. Please try again.');
+
+    } finally {
+        // Reset the upload area UI regardless of success or failure
+        const uploadArea = document.getElementById('upload-area');
+        uploadArea.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <p>Drag and drop a file here</p>
+        `;
+    }
+}
         });
     </script>
 </body>
