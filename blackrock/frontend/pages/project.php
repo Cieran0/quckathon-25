@@ -1,74 +1,47 @@
 <?php
 session_start();
 
-// Redirect unauthenticated users
+// Redirect if session_token is not set
 if (!isset($_SESSION['session_token'])) {
     header('Location: login.php');
     exit;
 }
 
-// Fetch projects from API
-$projects = [];
-$errorMessage = null;
-
-// Retrieve and validate the 'id' parameter from the query string
-if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $projectId = (int)$_GET['id']; // Sanitize the ID as an integer
-} else {
-    $errorMessage = "Invalid or missing project ID.";
-    echo "Error: $errorMessage\n";
+// Retrieve the 'id' from the URL query string
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    // If 'id' is missing or not numeric, handle the error
+    echo "Invalid or missing ID.";
     exit;
 }
 
-// Configuration
-$apiUrl = 'http://10.201.121.182:8000/project'; // Replace with the actual API endpoint
-$sessionToken = $_SESSION['session_token'];
+$id = (int)$_GET['id']; // Ensure the ID is an integer
 
-// Setup cURL request
-$ch = curl_init($apiUrl);
-
-// Prepare the POST body with the session token and project ID
-$postData = [
-    'session_token' => $sessionToken,
-    'id' => $projectId, // Include the project ID in the request
+// Prepare data to send as an associative array
+$data = [
+    'session_token' => $_SESSION['session_token'],
+    'id' => $id // Use the ID from the URL
 ];
 
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true); // Use POST method
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData)); // Send data as form-encoded
+// Convert the data to JSON format
+$json_data = json_encode($data);
 
-// Execute request
+// Initialize cURL session
+$ch = curl_init();
+curl_setopt_array($ch, [
+    CURLOPT_URL => 'http://10.201.121.182:8000/project', // Target URL
+    CURLOPT_POST => true, // Use POST method
+    CURLOPT_POSTFIELDS => $json_data, // Send JSON data
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json', // Set content type to JSON
+        'Content-Length: ' . strlen($json_data) // Optional: Specify content length
+    ],
+    CURLOPT_RETURNTRANSFER => true // Capture the response (optional)
+]);
+
+// Execute request and close cURL
 $response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-if ($response === false) {
-    $errorMessage = 'Network error: ' . curl_error($ch);
-} else {
-    if ($httpCode === 200) {
-        $responseData = json_decode($response, true);
-        if (isset($responseData['folders']) && isset($responseData['files'])) {
-            // Extract folders and files arrays
-            $folders = $responseData['folders'];
-            $files = $responseData['files'];
-
-            // Debugging: Print folders and files to the terminal
-            echo "Folders:\n";
-            var_dump($folders); // Use var_dump() for detailed output
-
-            echo "\nFiles:\n";
-            var_dump($files); // Use var_dump() for detailed output
-        } else {
-            $errorMessage = "Invalid API response format";
-        }
-    } else {
-        $errorMessage = "API Error ($httpCode): " . (json_decode($response, true)['error'] ?? 'Unknown error');
-    }
-}
-
 curl_close($ch);
 
-// If there's an error, print it to the terminal
-if ($errorMessage) {
-    echo "Error: $errorMessage\n";
-}
+// Handle the response from the server
+echo $response;
 ?>
