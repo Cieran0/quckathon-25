@@ -10,8 +10,8 @@ import (
 
 func main() {
     db.Connect()
-    db.InitDatabaseTables()
-    db.TempData()
+    //db.InitDatabaseTables()
+    //db.TempData()
 
     router := routes.RegisterRoute()
 

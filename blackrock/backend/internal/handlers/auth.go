@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+    "log"
 
 	"backend/internal/db"
 
@@ -20,7 +21,7 @@ type LoginRequest struct {
 
 type LoginResponse struct {
     Message string `json:"message"`
-    Token string `json:"json,omitempty"`
+    Token string `json:"session_token,omitempty"`
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +35,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
+
+    log.Printf("Received login request: %+v", req)
 
 	var userID int
 	var hashedPassword string
