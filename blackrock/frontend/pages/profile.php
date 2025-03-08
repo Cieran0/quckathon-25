@@ -21,7 +21,7 @@ $followedProjects = [
     'Project Gamma'
 ];
 
-    $url = 'http://10.201.121.182:8000/profile';
+    $url = 'http://192.168.0.7:8040/profile';
     $data = [
         'session_token' => $_SESSION['session_token']
     ];

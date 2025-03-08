@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Username and password are required.";
     } else {
         // Setup cURL request
-        $url = 'http://10.201.121.182:8000/login';
+        $url = 'http://192.168.0.7:8040/login';
         $data = [
             'username' => $username,
             'password' => $password

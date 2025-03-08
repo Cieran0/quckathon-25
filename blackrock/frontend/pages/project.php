@@ -9,7 +9,7 @@ $id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
 // Fetch ALL folder and file data from the API
 $ch = curl_init();
 curl_setopt_array($ch, [
-    CURLOPT_URL => 'http://10.201.121.182:8000/project',
+    CURLOPT_URL => 'http://192.168.0.7:8040/project',
     CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => json_encode([
         'session_token' => $_SESSION['session_token'],
@@ -287,7 +287,7 @@ $rootData = $responseData['folders'][0] ?? [];
                 fileDetails.innerHTML = '<div class="loading-spinner"></div>';
                 modal.style.display = 'block';
                 // Fetch file details from the server
-                fetch('http://10.201.121.182:8000/file', {
+                fetch('http://192.168.0.7:8040/file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ file_id: Number(fileId) })
@@ -336,7 +336,7 @@ $rootData = $responseData['folders'][0] ?? [];
 
             // Download File Functionality
             window.downloadFile = (fileId, filename, ver) => {
-                fetch('http://10.201.121.182:8000/download', {
+                fetch('http://192.168.0.7:8040/download', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -419,7 +419,7 @@ $rootData = $responseData['folders'][0] ?? [];
         `;
 
         // Send the file to the backend
-        const response = await fetch('http://10.201.121.182:8000/upload', {
+        const response = await fetch('http://192.168.0.7:8040/upload', {
             method: 'POST',
             body: formData,
         });

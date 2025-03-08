@@ -12,7 +12,7 @@ $projects = [];
 $errorMessage = null;
 
 // Configuration
-$apiUrl = 'http://10.201.121.182:8000/projects';
+$apiUrl = 'http://192.168.0.7:8040/projects';
 $sessionToken = $_SESSION['session_token'];
 
 // Setup cURL request

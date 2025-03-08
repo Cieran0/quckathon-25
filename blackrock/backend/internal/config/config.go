@@ -1,14 +1,14 @@
 package config
 
 import (
-    "fmt"
+	"fmt"
 )
 
 func GetDatabaseURL() string {
     host := "localhost"
     port := 5432
-    user := "bennh"
-    password := "houghton"
+    user := "cieran"
+    password := "db"
     dbname := "blackrock"
     sslmode := "disable"
 
