@@ -12,7 +12,8 @@ $projects = [];
 $errorMessage = null;
 
 // Configuration
-$apiUrl = 'http://10.201.121.182:8000/projects';
+include 'config.php';
+$apiUrl = 'http://' . BACKEND_IP . ':' . BACKEND_PORT . '/projects';
 $sessionToken = $_SESSION['session_token'];
 
 // Setup cURL request

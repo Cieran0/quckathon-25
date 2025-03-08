@@ -7,7 +7,8 @@ if (!isset($_SESSION['session_token'])) {
     exit;
 }
 
-    $url = 'http://10.201.121.182:8000/profile';
+    include 'config.php';
+    $url = 'http://' . BACKEND_IP . ':' . BACKEND_PORT . '/profile';
     if (isset($_GET['profile'])) {
         $data = [
             'username' => $_GET['profile'],

@@ -26,9 +26,10 @@ $data = [
 $json_data = json_encode($data);
 
 // Initialize cURL session
+include 'config.php';
 $ch = curl_init();
 curl_setopt_array($ch, [
-    CURLOPT_URL => 'http://10.201.121.182:8000/project', // Target URL
+    CURLOPT_URL => 'http://' . BACKEND_IP . ':' . BACKEND_PORT . '/project', // target url
     CURLOPT_POST => true, // Use POST method
     CURLOPT_POSTFIELDS => $json_data, // Send JSON data
     CURLOPT_HTTPHEADER => [
