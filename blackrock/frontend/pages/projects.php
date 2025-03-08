@@ -12,7 +12,7 @@ $projects = [];
 $errorMessage = null;
 
 // Configuration
-$apiUrl = 'http://localhost:8080/projects';
+$apiUrl = 'http://10.201.121.182:8000/projects';
 $sessionToken = $_SESSION['session_token'];
 
 // Setup cURL request
