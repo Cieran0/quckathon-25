@@ -9,6 +9,10 @@ import (
     "time"
 )
 
+type GetProjectsRequest struct {
+	SessionToken string `json:"session_token"`
+}
+
 type ProjectsResponse struct {
     ID int `json:"id"`
     Name string `json:"name"`
@@ -16,40 +20,77 @@ type ProjectsResponse struct {
 }
 
 func GetProjects(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodGet {
-        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-    rows, err := db.DB.Query("SELECT id, name, description FROM projects")
+	var req GetProjectsRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	var userID int
+	err := db.DB.QueryRow("SELECT user_id FROM session_tokens WHERE token = $1", req.SessionToken).Scan(&userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Invalid session token", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	rows, err := db.DB.Query("SELECT id, name, description FROM projects")
 	if err != nil {
 		http.Error(w, "Failed to query projects", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	projects := []ProjectsResponse{}
+	allProjects := []ProjectsResponse{}
 	for rows.Next() {
 		var p ProjectsResponse
-		err := rows.Scan(&p.ID, &p.Name, &p.Description)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				http.Error(w, "No projects found", http.StatusNotFound)
-			} else {
-				http.Error(w, "Error scanning projects", http.StatusInternalServerError)
-			}
+		if err := rows.Scan(&p.ID, &p.Name, &p.Description); err != nil {
+			http.Error(w, "Error scanning projects", http.StatusInternalServerError)
 			return
 		}
-		projects = append(projects, p)
+		allProjects = append(allProjects, p)
 	}
-
 	if err = rows.Err(); err != nil {
 		http.Error(w, "Error reading projects", http.StatusInternalServerError)
 		return
 	}
 
-    response := map[string]any{
-		"projects": projects,
+	followRows, err := db.DB.Query(`
+        SELECT p.id, p.name, p.description 
+        FROM projects p
+        JOIN user_projects up ON p.id = up.project_id
+        WHERE up.user_id = $1`, userID)
+	if err != nil {
+		http.Error(w, "Failed to query followed projects", http.StatusInternalServerError)
+		return
+	}
+	defer followRows.Close()
+
+	followedProjects := []ProjectsResponse{}
+	for followRows.Next() {
+		var p ProjectsResponse
+		if err := followRows.Scan(&p.ID, &p.Name, &p.Description); err != nil {
+			http.Error(w, "Error scanning followed projects", http.StatusInternalServerError)
+			return
+		}
+		followedProjects = append(followedProjects, p)
+	}
+	if err = followRows.Err(); err != nil {
+		http.Error(w, "Error reading followed projects", http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]any{
+		"projects":          allProjects,
+		"followed_projects": followedProjects,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -57,7 +98,6 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
-
 type ViewProjectRequest struct {
 	ProjectID    int    `json:"id"`
 	SessionToken string `json:"session_token"`

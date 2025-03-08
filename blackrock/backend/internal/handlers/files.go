@@ -4,6 +4,7 @@ import (
     _"database/sql"
 	"encoding/json"
 	"net/http"
+    "log"
     "time"
 
 	"backend/internal/db"
@@ -21,7 +22,6 @@ type VersionInfo struct {
 
 type FileDataResponse struct {
 	FileID              int           `json:"file_id"`
-	Content             string        `json:"content"`
     MimeType            string        `json:"mime_type"`
 	FileExtension       string        `json:"file_extension"`
 	Size                int64         `json:"size"`
@@ -30,14 +30,29 @@ type FileDataResponse struct {
 	PreviousVersions    []VersionInfo `json:"previous_versions"`
 }
 
+func setCORSHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+}
+
 func GetFileData(w http.ResponseWriter, r *http.Request) {
+    if r.Method == http.MethodOptions {
+		setCORSHeaders(w)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
+    setCORSHeaders(w)
+
 	var req FileDataRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        log.Printf("Received file request: %+v", req) 
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -78,7 +93,6 @@ func GetFileData(w http.ResponseWriter, r *http.Request) {
 		if isFirstRow {
 			response = FileDataResponse{
 				FileID:              fileID,
-				Content:             string(content),
 				MimeType:            mimeType,
 				FileExtension:       fileExtension,
 				Size:                size,

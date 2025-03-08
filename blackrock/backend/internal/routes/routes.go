@@ -14,6 +14,7 @@ func RegisterRoute() http.Handler {
     mux.HandleFunc("/project", handlers.ViewProject)
     mux.HandleFunc("/file", handlers.GetFileData)
     mux.HandleFunc("/profile", handlers.GetProfile)
+    mux.HandleFunc("/download", handlers.DownloadFile)
 
     return mux
 }
