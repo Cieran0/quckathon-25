@@ -3,6 +3,7 @@
     <nav class="flex items-center">
         <a href="projects.php" class="mr-6 text-xl text-custom-green hover:text-black">Projects</a>
         <a href="graphs.php" class="mr-6 text-xl text-custom-green hover:text-black">Analytics</a>
+        <a href="profile.php" class="mr-6 text-xl text-custom-green hover:text-black">My Account</a>
         
         <?php if (isset($_SESSION['session_token'])): ?>
             <!-- Display logout button only if logged in -->
