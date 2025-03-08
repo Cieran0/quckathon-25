@@ -7,24 +7,19 @@ if (!isset($_SESSION['session_token'])) {
     exit;
 }
 
-// Sample user data (replace with actual API call or database query)
-$user = [
-    'name' => 'John Doe',
-    'phone' => '+44 1234 567890',
-    'email' => 'johndoe@example.com'
-];
-
-// Sample followed projects (replace with actual API call or database query)
-$followedProjects = [
-    'Project Alpha',
-    'Project Beta',
-    'Project Gamma'
-];
-
     $url = 'http://10.201.121.182:8000/profile';
-    $data = [
-        'session_token' => $_SESSION['session_token']
-    ];
+    if (isset($_GET['profile'])) {
+        $data = [
+            'username' => $_GET['profile'],
+            'session_token' => $_SESSION['session_token']
+        ];
+    }
+    else{
+        $data = [
+            'session_token' => $_SESSION['session_token']
+        ];
+    }
+
     $jsonData = json_encode($data);
 
     $ch = curl_init($url);
@@ -54,7 +49,11 @@ $followedProjects = [
         if (json_last_error() !== JSON_ERROR_NONE) {
             $errorMessage = "Invalid response format";
             error_log("JSON Decode Error: " . json_last_error_msg());
-        } else {
+        } 
+        else if ($responseData['username'] == ''){
+            echo 'user not found';
+        }
+        else {
             // Save session token
             $user = $responseData['username'];
             $phone = $responseData['phone_number'];
