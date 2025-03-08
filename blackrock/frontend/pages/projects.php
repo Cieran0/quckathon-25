@@ -129,7 +129,7 @@ curl_close($ch);
         <nav class="flex items-center">
             <a href="projects.php" class="mr-4 text-custom-green hover:text-black">Projects</a>
             <a href="#analytics" class="mr-4 text-custom-green hover:text-black">Analytics</a>
-            <button class="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-400">Logout</button>
+            <form action="logout.php"><button type="submit" class="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-400">Logout</button></form>
         </nav>
     </header>
 
