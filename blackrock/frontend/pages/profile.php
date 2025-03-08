@@ -20,6 +20,48 @@ $followedProjects = [
     'Project Beta',
     'Project Gamma'
 ];
+
+    $url = 'http://10.201.121.182:8000/profile';
+    $data = [
+        'session_token' => $_SESSION['session_token']
+    ];
+    $jsonData = json_encode($data);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($jsonData)
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Ensure response is returned
+
+    // Execute request
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    // Process response
+    if ($response === false) {
+        $errorMessage = "Network error: " . $curlError;
+        error_log("cURL Error: " . $curlError);
+    } elseif ($httpCode != 200) {
+        $errorMessage = "Server error: HTTP $httpCode";
+        error_log("API Response Code: $httpCode");
+    } else {
+        $responseData = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $errorMessage = "Invalid response format";
+            error_log("JSON Decode Error: " . json_last_error_msg());
+        } else {
+            // Save session token
+            $user = $responseData['username'];
+            $phone = $responseData['phone_number'];
+            $email = $responseData['email'];
+            $followedProjects = $responseData['followed_projects'];
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -131,15 +173,15 @@ $followedProjects = [
         <div class="w-full max-w-3xl bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-semibold text-custom-green mb-4">User Profile</h2>
             <div class="mb-4">
-                <p class="text-gray-800"><strong>Name:</strong> <?php echo htmlspecialchars($user['name']); ?></p>
-                <p class="text-gray-800"><strong class="text-gray-800">Phone:</strong> <?php echo htmlspecialchars($user['phone']); ?></p>
-                <p class="text-gray-800"><strong class="text-gray-800">Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
+                <p class="text-gray-800"><strong>Name:</strong> <?php echo htmlspecialchars($user); ?></p>
+                <p class="text-gray-800"><strong class="text-gray-800">Phone:</strong> <?php echo htmlspecialchars($phone); ?></p>
+                <p class="text-gray-800"><strong class="text-gray-800">Email:</strong> <?php echo htmlspecialchars($email); ?></p>
             </div>
             
             <h3 class="text-xl font-semibold text-custom-green mb-2">Followed Projects</h3>
             <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
                 <?php foreach ($followedProjects as $project): ?>
-                    <li class="mb-1 text-gray-800"> <?php echo htmlspecialchars($project); ?> </li>
+                    <li class="mb-1 text-gray-800"> <?php echo htmlspecialchars($project['name']); ?> </li>
                 <?php endforeach; ?>
             </ul>
         </div>
