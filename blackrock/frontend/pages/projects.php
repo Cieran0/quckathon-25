@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-$_SESSION['session_token'] = 0;
-
 // Redirect unauthenticated users
 if (!isset($_SESSION['session_token'])) {
     header('Location: login.php');
