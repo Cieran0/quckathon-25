@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+if(isset($_SESSION['session_token'])) {
+    header('Location: projects.php');
+    exit();
+}
+
 $errorMessage = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -12,16 +17,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Username and password are required.";
     } else {
         // Setup cURL request
-        $url = 'http://localhost:8080/try_login';
+        $url = 'http://10.201.121.182:8000/login';
         $data = [
             'username' => $username,
             'password' => $password
         ];
+        $jsonData = json_encode($data);
+
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($jsonData)
+        ]);
 
         // Execute request
         $response = curl_exec($ch);
