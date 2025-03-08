@@ -134,6 +134,32 @@ $rootData = $responseData['folders'][0] ?? [];
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Drag-and-Drop Upload Area Styles */
+        .upload-area {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            color: #666;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .upload-area.dragover {
+            border-color: #006844;
+            background-color: #e6f7f2;
+        }
+        .upload-area svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            color: #006844;
+        }
     </style>
 </head>
 <body class="bg-white flex flex-col h-screen">
@@ -149,6 +175,17 @@ $rootData = $responseData['folders'][0] ?? [];
         <section class="flex-grow p-4">
             <!-- Dynamic folder view container -->
             <div id="folder-view"></div>
+
+            <!-- Upload Area -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold mb-4">Upload File</h3>
+                <div id="upload-area" class="upload-area">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <p>Drag and drop a file here</p>
+                </div>
+            </div>
         </section>
         <aside class="w-64 p-4 custom-green text-white">
             <!-- Filters aside remains the same -->
@@ -170,11 +207,14 @@ $rootData = $responseData['folders'][0] ?? [];
         const folderData = <?= json_encode($rootData) ?>;
         // Expose session token to JavaScript
         const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
+
         document.addEventListener('DOMContentLoaded', () => {
             let currentFolder = folderData; // Start with the root folder
             const navigationStack = [currentFolder]; // Track navigation history
+
             // Render initial view
             renderFolder(currentFolder);
+
             function renderFolder(folder) {
                 const container = document.getElementById('folder-view');
                 container.innerHTML = `
@@ -187,6 +227,7 @@ $rootData = $responseData['folders'][0] ?? [];
                     <div class="grid grid-cols-4 gap-4">${renderItems(folder)}</div>
                 `;
             }
+
             function renderItems(folder) {
                 return `
                     ${folder.folders.map(f => `
@@ -209,6 +250,7 @@ $rootData = $responseData['folders'][0] ?? [];
                     `).join('')}
                 `;
             }
+
             window.openFolder = (folderId) => {
                 const findFolderById = (folders, id) => {
                     for (const folder of folders) {
@@ -229,6 +271,7 @@ $rootData = $responseData['folders'][0] ?? [];
                     console.error('Folder not found:', folderId);
                 }
             };
+
             window.goBack = () => {
                 if (navigationStack.length > 1) {
                     navigationStack.pop();
@@ -236,6 +279,7 @@ $rootData = $responseData['folders'][0] ?? [];
                     renderFolder(currentFolder);
                 }
             };
+
             // Open File Modal and Fetch Data
             window.openFile = (fileId, name) => {
                 const modal = document.getElementById('file-modal');
@@ -278,11 +322,13 @@ $rootData = $responseData['folders'][0] ?? [];
                     fileDetails.innerHTML = '<p>Failed to load file details. Please try again later.</p>';
                 });
             };
+
             // Close Modal
             window.closeModal = () => {
                 const modal = document.getElementById('file-modal');
                 modal.style.display = 'none';
             };
+
             // Close modal when clicking outside
             window.onclick = (event) => {
                 const modal = document.getElementById('file-modal');
@@ -290,6 +336,7 @@ $rootData = $responseData['folders'][0] ?? [];
                     closeModal();
                 }
             };
+
             // Download File Functionality
             window.downloadFile = (fileId, filename, ver) => {
                 fetch('http://10.201.121.182:8000/download', {
@@ -320,6 +367,24 @@ $rootData = $responseData['folders'][0] ?? [];
                     alert('Failed to download the file.');
                 });
             };
+
+            // Drag-and-Drop Upload Area Behavior
+            const uploadArea = document.getElementById('upload-area');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    alert(`File dropped: ${files[0].name}`);
+                }
+            });
         });
     </script>
 </body>
