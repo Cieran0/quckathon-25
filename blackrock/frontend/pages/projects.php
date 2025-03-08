@@ -18,12 +18,18 @@ $sessionToken = $_SESSION['session_token'];
 // Setup cURL request
 $ch = curl_init($apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$data = [
+    'session_token' => $sessionToken
+];
+$jsonData = json_encode($data);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Authorization: Bearer ' . $sessionToken,
+    'Content-Type: application/json',
+    'Content-Length: ' . strlen($jsonData)
 ]);
-
 // Execute request
 $response = curl_exec($ch);
+
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 if ($response === false) {
