@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+    "strings"
     "log"
 
 	"backend/internal/db"
@@ -12,6 +13,7 @@ import (
 
 type ProfileRequest struct {
 	SessionToken string `json:"session_token"`
+	Username     string `json:"username"`
 }
 
 type FollowedProject struct {
@@ -32,17 +34,18 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
 	var req ProfileRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
-    log.Printf("Received profile request: %+v", req) 
+	log.Printf("Received profile request: %+v", req)
 
-	var userID int
+	var tokenUserID int
 	var expiresAt time.Time
 	err := db.DB.QueryRow("SELECT user_id, expires_at FROM session_tokens WHERE token = $1", req.SessionToken).
-		Scan(&userID, &expiresAt)
+		Scan(&tokenUserID, &expiresAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid session token", http.StatusUnauthorized)
@@ -55,22 +58,52 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Session token expired", http.StatusUnauthorized)
 		return
 	}
+
 	var username, phone, email string
-	err = db.DB.QueryRow("SELECT username, phone_number, email FROM users WHERE id = $1", userID).
-		Scan(&username, &phone, &email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "User not found", http.StatusNotFound)
-		} else {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+	if strings.TrimSpace(req.Username) != "" {
+		err = db.DB.QueryRow("SELECT username, phone_number, email FROM users WHERE username = $1", req.Username).
+			Scan(&username, &phone, &email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "User not found", http.StatusNotFound)
+			} else {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+			return
 		}
-		return
+	} else {
+		err = db.DB.QueryRow("SELECT username, phone_number, email FROM users WHERE id = $1", tokenUserID).
+			Scan(&username, &phone, &email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "User not found", http.StatusNotFound)
+			} else {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+			return
+		}
 	}
+
+	var profileUserID int
+	if strings.TrimSpace(req.Username) != "" {
+		err = db.DB.QueryRow("SELECT id FROM users WHERE username = $1", req.Username).Scan(&profileUserID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "User not found", http.StatusNotFound)
+			} else {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+			return
+		}
+	} else {
+		profileUserID = tokenUserID
+	}
+
 	rows, err := db.DB.Query(`
         SELECT p.id, p.name, p.description 
         FROM projects p
         JOIN user_projects up ON p.id = up.project_id
-        WHERE up.user_id = $1`, userID)
+        WHERE up.user_id = $1`, profileUserID)
 	if err != nil {
 		http.Error(w, "Failed to query followed projects", http.StatusInternalServerError)
 		return
@@ -97,6 +130,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		Email:            email,
 		FollowedProjects: followedProjects,
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)

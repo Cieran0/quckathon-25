@@ -1,11 +1,11 @@
 package main
 
 import (
-    "net/http"
-    "log"
+	"log"
+	"net/http"
 
-    "backend/internal/db"
-    "backend/internal/routes"
+	"backend/internal/db"
+	"backend/internal/routes"
 )
 
 func main() {
@@ -15,6 +15,6 @@ func main() {
 
     router := routes.RegisterRoute()
 
-    log.Println("Listening on 10.201.121.182:8000")
-    log.Fatal(http.ListenAndServe("10.201.121.182:8000", router))
+    log.Println("Listening on 0.0.0.0:8040")
+    log.Fatal(http.ListenAndServe("0.0.0.0:8040", router))
 }

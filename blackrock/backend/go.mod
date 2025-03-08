@@ -1,6 +1,6 @@
 module backend
 
-go 1.24.1
+go 1.23.5
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
