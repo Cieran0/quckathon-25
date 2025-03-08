@@ -80,14 +80,7 @@
     </style>
 </head>
 <body class="bg-white flex flex-col h-screen">
-    <header class="flex items-center justify-between p-4 bg-white header-bottom-border">
-        <img src="logo.png" alt="Logo" class="h-10">
-        <nav class="flex items-center">
-            <a href="#projects" class="mr-4 text-custom-green hover:text-black">Projects</a>
-            <a href="#analytics" class="mr-4 text-custom-green hover:text-black">Analytics</a>
-            <button class="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-400">Login</button>
-        </nav>
-    </header>
+    <?php include 'header.php'; ?>
 
     <main class="flex flex-grow">
         <!-- Left Aside - Selected Projects -->
@@ -129,9 +122,7 @@
         </section>
     </main>
 
-    <footer class="dark-gray text-white py-4 text-center">
-        <p class="text-sm">&copy; 2024 The Green Team. All rights reserved.</p>
-    </footer>
+    <?php include 'footer.php'; ?>
 
     <script>
         // Sample data for charts
