@@ -1,5 +1,7 @@
 <header class="flex items-center justify-between p-4 bg-white header-bottom-border">
-    <img src="logo.png" alt="Logo" class="h-20">
+    <a href="projects.php">
+        <img src="logo.png" alt="Logo" class="h-20">
+    </a>
     <nav class="flex items-center">
         <a href="projects.php" class="mr-6 text-xl text-custom-green hover:text-black">Projects</a>
         <a href="graphs.php" class="mr-6 text-xl text-custom-green hover:text-black">Analytics</a>

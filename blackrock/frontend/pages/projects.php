@@ -39,6 +39,7 @@ if ($response === false) {
         $responseData = json_decode($response, true);
         if (isset($responseData['projects'])) {
             $projects = $responseData['projects'];
+            $followed_projects = $responseData['followed_projects'];
         } else {
             $errorMessage = "Invalid API response format";
         }
@@ -135,10 +136,14 @@ curl_close($ch);
 
     <main class="flex flex-grow">
         <aside class="w-64 p-4 custom-green text-white">
-            <h2 class="text-lg mb-2">Followed Projects</h2>
+            <h2 class="text-xl mb-6">Followed Projects</h2>
             <ul>
-                <li class="mb-2"><a href="#" class="text-white hover:text-gray-300">Project 1</a></li>
-                <li><a href="#" class="text-white hover:text-gray-300">Project 2</a></li>
+                <?php foreach ($followed_projects as $project): ?>
+                    <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
+    <?php echo htmlspecialchars($project['name']); ?>
+</li>
+
+                <?php endforeach; ?>
             </ul>
         </aside>
 
