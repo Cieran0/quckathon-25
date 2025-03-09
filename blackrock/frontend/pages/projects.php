@@ -178,13 +178,13 @@ curl_close($ch);
         <aside class="w-64 p-4 custom-green text-white">
             <h2 class="text-xl mb-6">Followed Projects</h2>
             <ul>
-            <?php foreach ($followed_projects as $project): ?>
+            <?php if(isset($followed_projects)) {foreach ($followed_projects as $project): ?>
                 <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
                     <a href="project.php?id=<?php echo htmlspecialchars($project['id']); ?>">
                         <?php echo htmlspecialchars($project['name']); ?>
                     </a>
                 </li>
-            <?php endforeach; ?>
+            <?php endforeach; }?>
             </ul>
         </aside>
 

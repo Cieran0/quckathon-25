@@ -55,6 +55,9 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	req.FolderID, _ = strconv.Atoi(r.FormValue("folder_id"))
 	req.ProjectID, _ = strconv.Atoi(r.FormValue("project_id"))
 
+	log.Printf("Received upload request: %+v", req)
+
+
 	if req.SessionToken == "" || req.FileName == "" || req.FolderID == 0 || req.ProjectID == 0 {
 		log.Println("Missing required parameters")
 		http.Error(w, "Missing required parameters", http.StatusBadRequest)
