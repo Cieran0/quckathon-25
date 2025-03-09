@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileDetails.innerHTML = '<div class="loading-spinner"></div>';
         modal.style.display = 'block';
         // Fetch file details from the server
-        fetch('http://192.168.0.7:8040/file', {
+        fetch('http://90.194.168.250:8040/file', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ file_id: Number(fileId) })
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Download file functionality
     window.downloadFile = (fileId, filename, ver) => {
-        fetch('http://192.168.0.7:8040/download', {
+        fetch('http://90.194.168.250:8040/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>Uploading...</p>
             `;
             // Send the file to the backend
-            const response = await fetch('http://192.168.0.7:8040/upload', {
+            const response = await fetch('http://90.194.168.250:8040/upload', {
                 method: 'POST',
                 body: formData,
             });
@@ -385,7 +385,7 @@ function createFolder(event) {
     const id = Number(params.get('id'));
 
     // Send request to create the folder
-    fetch('http://192.168.0.7:8040/new_folder', {
+    fetch('http://90.194.168.250:8040/new_folder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

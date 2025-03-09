@@ -150,156 +150,190 @@ func InitDatabaseTables() {
 // TempData inserts sample projects, folders, files, file versions, users, and user-project relationships.
 // The projects now include a number of volunteers and total funding values.
 func TempData() {
-	var projectIDs []int
+    var projectIDs []int
 
-	// Updated projects data with volunteers and total funding values.
-	projects := []struct {
-		name         string
-		description  string
-		volunteers   int
-		totalFunding float64
-	}{
-		{"Project Alpha", "Description for Project Alpha", 10, 1000.00},
-		{"Project Beta", "Description for Project Beta", 5, 500.00},
-		{"Project Gamma", "Description for Project Gamma", 15, 1500.00},
-		{"Project Delta", "Description for Project Delta", 8, 800.00},
-		{"Project Epsilon", "Description for Project Epsilon", 20, 2000.00},
-	}
+    // Updated projects data with volunteers (total_funding removed)
+    projects := []struct {
+        name        string
+        description string
+        volunteers  int
+    }{
+        {"Project Alpha", "Description for Project Alpha", 10},
+        {"Project Beta", "Description for Project Beta", 5},
+        {"Project Gamma", "Description for Project Gamma", 15},
+        {"Project Delta", "Description for Project Delta", 8},
+        {"Project Epsilon", "Description for Project Epsilon", 20},
+    }
 
-	for _, proj := range projects {
-		var projectID int
-		err := DB.QueryRow(
-			`INSERT INTO projects (name, description, volunteers, total_funding) VALUES ($1, $2, $3, $4) RETURNING id`,
-			proj.name, proj.description, proj.volunteers, proj.totalFunding,
-		).Scan(&projectID)
-		if err != nil {
-			log.Fatal("Failed to insert project:", err)
-		}
-		projectIDs = append(projectIDs, projectID)
-		log.Println("Inserted project:", proj.name, "ID:", projectID)
+    for _, proj := range projects {
+        var projectID int
+        err := DB.QueryRow(
+            `INSERT INTO projects (name, description, volunteers) VALUES ($1, $2, $3) RETURNING id`,
+            proj.name, proj.description, proj.volunteers,
+        ).Scan(&projectID)
+        if err != nil {
+            log.Printf("Failed to insert project %s: %v\n", proj.name, err)
+            continue // Skip to the next project if insertion fails
+        }
+        projectIDs = append(projectIDs, projectID)
+        log.Println("Inserted project:", proj.name, "ID:", projectID)
 
-		var rootFolderID int
-		err = DB.QueryRow(
-			`INSERT INTO folders (project_id, name) VALUES ($1, $2) RETURNING id`,
-			projectID, "Root Folder",
-		).Scan(&rootFolderID)
-		if err != nil {
-			log.Fatal("Failed to insert root folder for project", proj.name, ":", err)
-		}
-		log.Println("Inserted root folder for project", proj.name, "ID:", rootFolderID)
+        // Folder and file creation remains unchanged
+        var rootFolderID int
+        err = DB.QueryRow(
+            `INSERT INTO folders (project_id, name) VALUES ($1, $2) RETURNING id`,
+            projectID, "Root Folder",
+        ).Scan(&rootFolderID)
+        if err != nil {
+            log.Printf("Failed to insert root folder for project %s: %v\n", proj.name, err)
+            continue
+        }
 
-		var nestedFolderID int
-		err = DB.QueryRow(
-			`INSERT INTO folders (project_id, parent_folder_id, name) VALUES ($1, $2, $3) RETURNING id`,
-			projectID, rootFolderID, "Nested Folder",
-		).Scan(&nestedFolderID)
-		if err != nil {
-			log.Fatal("Failed to insert nested folder for project", proj.name, ":", err)
-		}
-		log.Println("Inserted nested folder for project", proj.name, "ID:", nestedFolderID)
+        var nestedFolderID int
+        err = DB.QueryRow(
+            `INSERT INTO folders (project_id, parent_folder_id, name) VALUES ($1, $2, $3) RETURNING id`,
+            projectID, rootFolderID, "Nested Folder",
+        ).Scan(&nestedFolderID)
+        if err != nil {
+            log.Printf("Failed to insert nested folder for project %s: %v\n", proj.name, err)
+            continue
+        }
 
-		var rootFileID int
-		err = DB.QueryRow(
-			`INSERT INTO files (folder_id, name) VALUES ($1, $2) RETURNING id`,
-			rootFolderID, "root_file.txt",
-		).Scan(&rootFileID)
-		if err != nil {
-			log.Fatal("Failed to insert file in root folder for project", proj.name, ":", err)
-		}
-		log.Println("Inserted file in root folder for project", proj.name, "ID:", rootFileID)
+        var rootFileID int
+        err = DB.QueryRow(
+            `INSERT INTO files (folder_id, name) VALUES ($1, $2) RETURNING id`,
+            rootFolderID, "root_file.txt",
+        ).Scan(&rootFileID)
+        if err != nil {
+            log.Printf("Failed to insert file in root folder for project %s: %v\n", proj.name, err)
+            continue
+        }
 
-		rootContent := "Placeholder content for root_file.txt in " + proj.name
-		_, err = DB.Exec(
-			`INSERT INTO file_versions (file_id, version_number, content, mime_type, file_extension, size, commit_message)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-			rootFileID, 1, []byte(rootContent), "text/plain", "txt", len(rootContent), "Initial version",
-		)
-		if err != nil {
-			log.Fatal("Failed to insert file version for root file in project", proj.name, ":", err)
-		}
-		log.Println("Inserted file version for root file in project", proj.name)
+        rootContent := "Placeholder content for root_file.txt in " + proj.name
+        _, err = DB.Exec(
+            `INSERT INTO file_versions (file_id, version_number, content, mime_type, file_extension, size, commit_message)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            rootFileID, 1, []byte(rootContent), "text/plain", "txt", len(rootContent), "Initial version",
+        )
+        if err != nil {
+            log.Printf("Failed to insert file version for root file in project %s: %v\n", proj.name, err)
+            continue
+        }
 
-		var nestedFileID int
-		err = DB.QueryRow(
-			`INSERT INTO files (folder_id, name) VALUES ($1, $2) RETURNING id`,
-			nestedFolderID, "nested_file.txt",
-		).Scan(&nestedFileID)
-		if err != nil {
-			log.Fatal("Failed to insert file in nested folder for project", proj.name, ":", err)
-		}
-		log.Println("Inserted file in nested folder for project", proj.name, "ID:", nestedFileID)
+        var nestedFileID int
+        err = DB.QueryRow(
+            `INSERT INTO files (folder_id, name) VALUES ($1, $2) RETURNING id`,
+            nestedFolderID, "nested_file.txt",
+        ).Scan(&nestedFileID)
+        if err != nil {
+            log.Printf("Failed to insert file in nested folder for project %s: %v\n", proj.name, err)
+            continue
+        }
 
-		nestedContent := "Placeholder content for nested_file.txt in " + proj.name
-		_, err = DB.Exec(
-			`INSERT INTO file_versions (file_id, version_number, content, mime_type, file_extension, size, commit_message)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-			nestedFileID, 1, []byte(nestedContent), "text/plain", "txt", len(nestedContent), "Initial version",
-		)
-		if err != nil {
-			log.Fatal("Failed to insert file version for nested file in project", proj.name, ":", err)
-		}
-		log.Println("Inserted file version for nested file in project", proj.name)
-	}
+        nestedContent := "Placeholder content for nested_file.txt in " + proj.name
+        _, err = DB.Exec(
+            `INSERT INTO file_versions (file_id, version_number, content, mime_type, file_extension, size, commit_message)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            nestedFileID, 1, []byte(nestedContent), "text/plain", "txt", len(nestedContent), "Initial version",
+        )
+        if err != nil {
+            log.Printf("Failed to insert file version for nested file in project %s: %v\n", proj.name, err)
+            continue
+        }
+    }
 
-	type userData struct {
-		username, password, phone, email string
-	}
-	users := []userData{
-		{"alice", "password123", "1111111111", "alice@example.com"},
-		{"bob", "password123", "2222222222", "bob@example.com"},
-		{"carol", "password123", "3333333333", "carol@example.com"},
-	}
+    type userData struct {
+        username, password, phone, email string
+    }
+    users := []userData{
+        {"alice", "password123", "1111111111", "alice@example.com"},
+        {"bob", "password123", "2222222222", "bob@example.com"},
+        {"carol", "password123", "3333333333", "carol@example.com"},
+    }
 
-	userIDs := make(map[string]int)
-	for _, u := range users {
-		hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(u.password), bcrypt.DefaultCost)
-		if err != nil {
-			log.Fatal("Failed to hash password for user", u.username, ":", err)
-		}
-		hashedPassword := string(hashedPasswordBytes)
+    userIDs := make(map[string]int)
+    for _, u := range users {
+        hashedPasswordBytes, err := bcrypt.GenerateFromPassword([]byte(u.password), bcrypt.DefaultCost)
+        if err != nil {
+            log.Printf("Failed to hash password for user %s: %v\n", u.username, err)
+            continue
+        }
+        hashedPassword := string(hashedPasswordBytes)
 
-		var userID int
-		err = DB.QueryRow(
-			`INSERT INTO users (username, hashed_password, phone_number, email) VALUES ($1, $2, $3, $4) RETURNING id`,
-			u.username, hashedPassword, u.phone, u.email,
-		).Scan(&userID)
-		if err != nil {
-			log.Fatal("Failed to insert user", u.username, ":", err)
-		}
-		userIDs[u.username] = userID
-		log.Println("Inserted user", u.username, "with ID:", userID)
-	}
+        var userID int
+        err = DB.QueryRow(
+            `INSERT INTO users (username, hashed_password, phone_number, email) VALUES ($1, $2, $3, $4) RETURNING id`,
+            u.username, hashedPassword, u.phone, u.email,
+        ).Scan(&userID)
+        if err != nil {
+            log.Printf("Failed to insert user %s: %v\n", u.username, err)
+            continue
+        }
+        userIDs[u.username] = userID
+        log.Println("Inserted user", u.username, "with ID:", userID)
+    }
 
-	if len(projectIDs) >= 5 {
-		_, err := DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`,
-			userIDs["alice"], projectIDs[0])
-		if err != nil {
-			log.Fatal("Failed to insert user_projects for alice:", err)
-		}
-		_, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`,
-			userIDs["alice"], projectIDs[2])
-		if err != nil {
-			log.Fatal("Failed to insert user_projects for alice:", err)
-		}
+    if len(projectIDs) >= 5 {
+        // User-project relationships
+        _, err := DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`, userIDs["alice"], projectIDs[0])
+        if err != nil {
+            log.Printf("Failed to insert user-project relationship for alice and project %d: %v\n", projectIDs[0], err)
+        }
+        _, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`, userIDs["alice"], projectIDs[2])
+        if err != nil {
+            log.Printf("Failed to insert user-project relationship for alice and project %d: %v\n", projectIDs[2], err)
+        }
+        _, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`, userIDs["bob"], projectIDs[1])
+        if err != nil {
+            log.Printf("Failed to insert user-project relationship for bob and project %d: %v\n", projectIDs[1], err)
+        }
+        _, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`, userIDs["bob"], projectIDs[3])
+        if err != nil {
+            log.Printf("Failed to insert user-project relationship for bob and project %d: %v\n", projectIDs[3], err)
+        }
+        _, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`, userIDs["carol"], projectIDs[4])
+        if err != nil {
+            log.Printf("Failed to insert user-project relationship for carol and project %d: %v\n", projectIDs[4], err)
+        }
+        log.Println("Inserted user-project follow relationships")
 
-		_, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`,
-			userIDs["bob"], projectIDs[1])
-		if err != nil {
-			log.Fatal("Failed to insert user_projects for bob:", err)
-		}
-		_, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`,
-			userIDs["bob"], projectIDs[3])
-		if err != nil {
-			log.Fatal("Failed to insert user_projects for bob:", err)
-		}
+        // Add contributions based on original total_funding values
+        contributions := []struct {
+            projectIndex int
+            user         string
+            amount       float64
+        }{
+            {0, "alice", 1000.00},
+            {1, "bob", 500.00},
+            {2, "alice", 1500.00},
+            {3, "bob", 800.00},
+            {4, "carol", 2000.00},
+        }
 
-		_, err = DB.Exec(`INSERT INTO user_projects (user_id, project_id) VALUES ($1, $2)`,
-			userIDs["carol"], projectIDs[4])
-		if err != nil {
-			log.Fatal("Failed to insert user_projects for carol:", err)
-		}
-		log.Println("Inserted user-project follow relationships")
-	} else {
-		log.Println("Not enough projects inserted to create user-project relationships")
-	}
+        for _, c := range contributions {
+            projectID := projectIDs[c.projectIndex]
+            var username, email, phone string
+            switch c.user {
+            case "alice":
+                username, email, phone = "alice", "alice@example.com", "1111111111"
+            case "bob":
+                username, email, phone = "bob", "bob@example.com", "2222222222"
+            case "carol":
+                username, email, phone = "carol", "carol@example.com", "3333333333"
+            }
+
+            _, err := DB.Exec(
+                `INSERT INTO contributions (project_id, contributor_name, email, phone_number, amount)
+                 VALUES ($1, $2, $3, $4, $5)`,
+                projectID, username, email, phone, c.amount,
+            )
+            if err != nil {
+                log.Printf("Failed to insert contribution for project %d: %v\n", c.projectIndex, err)
+            } else {
+                log.Printf("Inserted $%.2f contribution from %s to project %d\n", c.amount, c.user, projectID)
+            }
+        }
+    } else {
+        log.Println("Not enough projects inserted to create user-project relationships")
+    }
 }
