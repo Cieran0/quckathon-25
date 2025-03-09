@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Open a folder and update the view
+    // Open a folder and update the view by folder id
     window.openFolder = (folderId) => {
         const findFolderById = (folders, id) => {
             for (const folder of folders) {
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadArea.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="animate-spin h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 16v1a3 3 0 013 3h10a3 3 0 013-3v-1m-4-8l-4-4m0 0L8 8m4-4v12z"></path>
+                    <path class="opacity-75" fill="currentColor" d="M4 16v1a3 3 0 013 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12z"></path>
                 </svg>
                 <p>Uploading...</p>
             `;
@@ -275,13 +275,39 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.add('hidden');
     };
 
-    
+    // Function to navigate folders by path segments
+    function navigateToPath(pathString) {
+        // Remove any leading/trailing slashes and split the path
+        const segments = pathString.replace(/^\/|\/$/g, '').split('/');
+        let folder = folderData;
+        // Reset navigationStack starting with the root folder
+        navigationStack.length = 0;
+        navigationStack.push(folder);
+        for (const segment of segments) {
+            // Find a folder inside the current folder with a matching name (case-insensitive)
+            const nextFolder = folder.folders.find(f => f.name.toLowerCase() === segment.toLowerCase());
+            if (nextFolder) {
+                folder = nextFolder;
+                navigationStack.push(folder);
+            } else {
+                console.warn(`Folder not found for segment: ${segment}`);
+                break;
+            }
+        }
+        return folder;
+    }
+
+    // Check URL params for the "path" parameter and navigate if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const pathParam = urlParams.get('path');
+    if (pathParam) {
+        currentFolder = navigateToPath(pathParam);
+    }
 
     // Initial render
     renderFolder(currentFolder);
 });
 
-// Handle folder creation form submission
 function createFolder(event) {
     event.preventDefault(); // Prevent default form submission
     const folderNameInput = document.getElementById('folder-name-input');
@@ -290,9 +316,15 @@ function createFolder(event) {
         alert('Please enter a valid folder name.');
         return;
     }
+    
+    // Check if a folder with the same name already exists in the current folder
+    const existingFolder = currentFolder.folders.find(f => f.name.toLowerCase() === folderName.toLowerCase());
+    if (existingFolder) {
+        alert('A folder with that name already exists.');
+        return;
+    }
 
     const params = new URLSearchParams(window.location.search);
-
     const id = Number(params.get('id'));
 
     // Send request to create the folder
