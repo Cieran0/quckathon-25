@@ -150,7 +150,7 @@ curl_close($ch);
     <?php include 'header.php'; ?>
 
     <!-- Modal -->
-    <div id="project-modal" <div id="project-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">>
+    <div id="project-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg w-96">
             <h2 class="text-xl font-bold mb-4">Create New Project</h2>
             <form id="project-form">
@@ -178,11 +178,13 @@ curl_close($ch);
         <aside class="w-64 p-4 custom-green text-white">
             <h2 class="text-xl mb-6">Followed Projects</h2>
             <ul>
-                <?php foreach ($followed_projects as $project): ?>
-                    <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
+            <?php foreach ($followed_projects as $project): ?>
+                <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
+                    <a href="project.php?id=<?php echo htmlspecialchars($project['id']); ?>">
                         <?php echo htmlspecialchars($project['name']); ?>
-                    </li>
-                <?php endforeach; ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
             </ul>
         </aside>
 
