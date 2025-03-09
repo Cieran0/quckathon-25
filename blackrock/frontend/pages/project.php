@@ -10,9 +10,10 @@ if (!isset($_SESSION['session_token'])) {
 $id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
 
 // Fetch ALL folder and file data from the API
+include 'config.php';
 $ch = curl_init();
 curl_setopt_array($ch, [
-    CURLOPT_URL => 'http://192.168.0.7:8040/project',
+    CURLOPT_URL => 'http://' . BACKEND_IP . ':' . BACKEND_PORT . '/project', // target url
     CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => json_encode([
         'session_token' => $_SESSION['session_token'],

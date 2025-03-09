@@ -12,7 +12,8 @@ $projects = [];
 $errorMessage = null;
 
 // Configuration
-$apiUrl = 'http://192.168.0.7:8040/projects';
+include 'config.php';
+$apiUrl = 'http://' . BACKEND_IP . ':' . BACKEND_PORT . '/projects';
 $sessionToken = $_SESSION['session_token'];
 
 // Setup cURL request
@@ -181,16 +182,14 @@ curl_close($ch);
                     <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
                         <?php echo htmlspecialchars($project['name']); ?>
                     </li>
-
                 <?php endforeach; ?>
             </ul>
         </aside>
 
         <section class="flex-grow p-4">
             <div class="flex items-center mb-4">
-                <input type="text" placeholder="Search Projects..."
-                    class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300">
-                <button class="px-4 py-2 bg-green-600 rounded-r hover:bg-green-400 text-white">Search</button>
+                <input id="searchInput" type="text" placeholder="Search Projects..." class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300">
+                <button id="searchButton" class="px-4 py-2 bg-green-600 rounded-r hover:bg-green-400 text-white">Search</button>
             </div>
 
             <div class="grid grid-cols-4 gap-4">
@@ -272,5 +271,23 @@ curl_close($ch);
         });
     </script>
 </body>
+<script>
+document.getElementById('searchInput').addEventListener('input', function() {
+    let filter = this.value.toLowerCase();
 
+    // Filter main project cards
+    let projects = document.querySelectorAll('.project-card');
+    projects.forEach(project => {
+        let projectName = project.querySelector('h3')?.textContent.toLowerCase() || "";
+        project.parentElement.style.display = projectName.includes(filter) ? "block" : "none";
+    });
+
+    // Filter followed projects list
+    let followedProjects = document.querySelectorAll('.followed-projects li');
+    followedProjects.forEach(item => {
+        let projectName = item.textContent.toLowerCase();
+        item.style.display = projectName.includes(filter) ? "block" : "none";
+    });
+});
+</script>
 </html>

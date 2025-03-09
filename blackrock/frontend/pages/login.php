@@ -10,6 +10,7 @@ if (isset($_SESSION['session_token'])) {
 $errorMessage = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
@@ -18,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Username and password are required.";
     } else {
         // Setup cURL request
-        $url = 'http://192.168.0.7:8040/login';
+        include 'config.php';
+        $url = 'http://' . BACKEND_IP . ':' . BACKEND_PORT . '/login';
         $data = [
             'username' => $username,
             'password' => $password
