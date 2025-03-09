@@ -19,6 +19,7 @@ func RegisterRoute() http.Handler {
     mux.HandleFunc("/new_project", handlers.NewProject)
     mux.HandleFunc("/new_folder", handlers.NewFolder)
     mux.HandleFunc("/analytics", handlers.Analytics)
+    mux.HandleFunc("/follow", handlers.Follow)
 
     return mux
 }

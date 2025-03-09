@@ -1,4 +1,3 @@
-let currentFolder = null;
 
 function findFolderById(folders, id) {
     for (const folder of folders) {
@@ -161,45 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
       
-    
-
-    // Open file details modal
-    window.openFile = (fileId, name) => {
-        const modal = document.getElementById('file-modal');
-        const fileDetails = document.getElementById('file-details');
-        const fileName = document.getElementById('file-name');
-        // Reset modal content
-        fileName.innerText = 'Loading...';
-        fileDetails.innerHTML = '<div class="loading-spinner"></div>';
-        modal.style.display = 'block';
-        // Fetch file details from the server
-        fetch('http://90.194.168.250:8040/file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ file_id: Number(fileId) })
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch file details');
-            return response.json();
-        })
-        .then(data => {
-            fileName.innerText = name;
-            fileDetails.innerHTML = `
-                <p><strong>Type:</strong> ${data.mime_type || 'Unknown'}</p>
-                <p><strong>Size:</strong> ${data.size || 'Unknown'}</p>
-                <p><strong>Last Updated:</strong> ${data.latest_created_at || 'Unknown'}</p>
-                <button onclick="downloadFile(${fileId}, '${name}', '${data.latest_version_number}')" 
-                        class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700">
-                    Download
-                </button>
-            `;
-        })
-        .catch(error => {
-            console.error('Error fetching file details:', error);
-            fileName.innerText = 'Error';
-            fileDetails.innerHTML = '<p>Failed to load file details. Please try again later.</p>';
-        });
-    };
 
     // Close the modal
     window.closeModal = () => {
@@ -216,13 +176,79 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Download file functionality
-    window.downloadFile = (fileId, filename, ver) => {
+    window.openFile = (fileId, name) => {
+        const modal = document.getElementById('file-modal');
+        const fileDetails = document.getElementById('file-details');
+        const fileName = document.getElementById('file-name');
+        
+        fileName.innerText = 'Loading...';
+        fileDetails.innerHTML = '<div class="loading-spinner"></div>';
+        modal.style.display = 'block';
+    
+        // Fetch file details including all versions
+        fetch('http://90.194.168.250:8040/file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file_id: Number(fileId) })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch file details');
+            return response.json();
+        })
+        .then(data => {
+            fileName.innerText = name;
+            // Create current version object
+            const currentVersion = {
+                version_number: data.latest_version_number,
+                created_at: data.latest_created_at,
+                size: data.size,
+                is_current: true
+            };
+    
+            // Combine current version with previous versions and sort
+            const allVersions = [currentVersion, ...data.previous_versions];
+            const sortedVersions = allVersions.sort((a, b) => 
+                new Date(b.created_at) - new Date(a.created_at)
+            );
+    
+
+            fileDetails.innerHTML = `
+                <p><strong>Type:</strong> ${data.mime_type || 'Unknown'}</p>
+                <p><strong>Current Size:</strong> ${data.size || 'Unknown'}</p>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-300">Select Version:</label>
+                    <select id="version-select" class="mt-1 block w-full p-2 rounded bg-custom-green text-white border border-gray-600">
+                        ${sortedVersions.map(version => `
+                            <option value="${version.version_number}" ${version.is_current ? 'selected' : ''}>
+                                Version ${version.version_number} - 
+                                ${new Date(version.created_at).toLocaleDateString()} 
+                                ${new Date(version.created_at).toLocaleTimeString()}
+                                ${version.is_current ? '(Current)' : ''}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                <button onclick="downloadFile(${fileId}, '${name}', document.getElementById('version-select').value)" 
+                        class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700">
+                    Download
+                </button>
+            `;
+        })
+        .catch(error => {
+            console.error('Error fetching file details:', error);
+            fileName.innerText = 'Error';
+            fileDetails.innerHTML = '<p>Failed to load file details. Please try again later.</p>';
+        });
+    };
+    
+    // Modified download function to handle versions
+    window.downloadFile = (fileId, filename, version) => {
         fetch('http://90.194.168.250:8040/download', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 file_id: Number(fileId),
-                version_number: Number(ver),
+                version_number: Number(version),
                 session_token: sessionToken
             })
         })
