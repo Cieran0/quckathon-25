@@ -273,35 +273,48 @@ curl_close($ch);
 </body>
 
 <script>
+let debounceTimer;
+
 document.getElementById('searchInput').addEventListener('input', function() {
     let filter = this.value.toLowerCase();
     let projects = document.querySelectorAll('.project-wrapper');
 
-    projects.forEach(project => {
-        let projectName = project.querySelector('h3')?.textContent.toLowerCase() || "";
+    // Clear the previous timeout to debounce quickly typing
+    clearTimeout(debounceTimer);
 
-        if (filter === "") {
-            // Show all projects again
-            project.style.display = "block";
-            setTimeout(() => {
-                project.style.opacity = "1";
-                project.style.transform = "scale(1)";
-            }, 10);
-        } else if (projectName.includes(filter)) {
-            project.style.display = "block"; 
-            setTimeout(() => {
-                project.style.opacity = "1";
-                project.style.transform = "scale(1)";
-            }, 10);
-        } else {
-            project.style.opacity = "0";
-            project.style.transform = "scale(0.9)";
-            setTimeout(() => {
-                project.style.display = "none"; 
-            }, 500); 
-        }
-    });
+    // Set a new timeout to apply filter after a short delay (e.g., 500ms)
+    debounceTimer = setTimeout(() => {
+        projects.forEach(project => {
+            let projectName = project.querySelector('h3')?.textContent.toLowerCase() || "";
+
+            if (filter === "") {
+                // Show all projects again and fade them in
+                project.style.display = "block"; // Immediately show the project
+                setTimeout(() => {
+                    project.style.opacity = "1";  // Smooth fade-in after display is applied
+                    project.style.transform = "scale(1)";
+                }, 10);
+            } else if (projectName.includes(filter)) {
+                // If the project matches, show it and fade it in
+                project.style.display = "block";
+                setTimeout(() => {
+                    project.style.opacity = "1";
+                    project.style.transform = "scale(1)";
+                }, 10);
+            } else {
+                // If the project doesn't match, fade it out first, then hide it
+                project.style.opacity = "0";
+                project.style.transform = "scale(0.9)";
+                setTimeout(() => {
+                    project.style.display = "none";  // Hide after fading out
+                }, 500);  // Match the fade-out duration
+            }
+        });
+    }, 500);  // 500ms delay after typing stops (debounce time)
 });
 </script>
+
+
+
 
 </html>
