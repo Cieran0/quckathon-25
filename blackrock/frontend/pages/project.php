@@ -27,6 +27,8 @@ curl_close($ch);
 
 $responseData = json_decode($response, true);
 $rootData = $responseData['folders'][0] ?? [];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,19 +38,19 @@ $rootData = $responseData['folders'][0] ?? [];
     <title>Folders and Files</title>
     <link href="tailwind.min.css" rel="stylesheet">
     <link href="project-style.css" rel="stylesheet">
-    <script>
-        const folderData = <?= json_encode($rootData) ?>;
-        const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
-        const projectId = <?= json_encode($id) ?>;
-    </script>
-    <script src="project.js"></script>
 </head>
 <body class="bg-white flex flex-col h-screen">
     <?php include 'header.php'; ?>
+
     <main class="flex flex-grow">
-        <aside class="w-64 p-4 custom-green text-white">
-            <!---------------argh! -->
-        </aside>
+
+    <aside class="w-64 p-4 custom-green text-white">
+        <h1>Project Directory: </h1>
+        <a href="project.php?id=<?php echo htmlspecialchars($responseData['id']); ?>">
+            <h2 class="text-xl font-semibold mb-6"><?php echo htmlspecialchars($responseData['name']); ?></h2>
+        </a>
+        <ul id="folder-list"></ul>
+    </aside>
 
         <section class="flex-grow p-4">
             <!-- Dynamic folder view container -->
@@ -82,21 +84,12 @@ $rootData = $responseData['folders'][0] ?? [];
         </div>
     </div>
 
-
-    <!-- Modal for Entering Folder Name -->
-<div id="folder-name-modal" class="omodal hidden">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeFolderNameModal()">&times;</span>
-        <h2 class="text-xl font-bold mb-4">Create New Folder</h2>
-        <form id="folder-name-form" onsubmit="createFolder(event)">
-            <label for="folder-name-input" class="block text-sm font-medium text-gray-700">Folder Name:</label>
-            <input type="text" id="folder-name-input" name="folder-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" required>
-            <button type="submit" class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Create</button>
-        </form>
-    </div>
-</div>
-
     <!-- Include JavaScript -->
-
+    <script>
+        const folderData = <?= json_encode($rootData) ?>;
+        const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
+        const projectId = <?= json_encode($id) ?>;
+    </script>
+    <script src="project.js"></script>
 </body>
 </html>

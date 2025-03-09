@@ -27,7 +27,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
             }, 0);
         }
+        updateFolderList();
     }
+
+    function updateFolderList() {
+    const folderList = document.getElementById('folder-list');
+    folderList.innerHTML = ''; // Clear current list
+
+    navigationStack.forEach((folder, index) => {
+        // If you want to keep the root folder always visible, include index 0
+        if (index == 0) return
+        const li = document.createElement('li');
+        li.textContent = folder.name;
+        li.className = 'text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white';
+        li.onclick = () => window.backToFolder(folder.id); // Call openFolder when clicked
+        folderList.appendChild(li);
+    });
+}
 
     // Render individual folders, files, and the "New Folder" button
     function renderItems(folder, searchTerm) {
@@ -102,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentFolder = newFolder;
             navigationStack.push(currentFolder);
             renderFolder(currentFolder);
+            updateFolderList();
         } else {
             console.error('Folder not found:', folderId);
         }
@@ -114,8 +131,26 @@ document.addEventListener('DOMContentLoaded', () => {
             currentFolder = navigationStack[navigationStack.length - 1];
             currentSearchTerm = ''; // Clear search when going back
             renderFolder(currentFolder);
+            updateFolderList();
         }
     };
+
+    window.backToFolder = (folderId) => {
+        // Find the index of the folder in the navigationStack
+        const idx = navigationStack.findIndex(folder => folder.id === folderId);
+        
+        if (idx === -1) {
+          console.warn('Folder not found in navigation stack:', folderId);
+          return;
+        }
+        
+        // Pop back until the navigationStack length is idx+1
+        while (navigationStack.length > idx + 1) {
+          goBack();
+        }
+      };
+      
+    
 
     // Open file details modal
     window.openFile = (fileId, name) => {
@@ -331,3 +366,4 @@ function fetchProjectData() {
     })
     .then(response => response.json());
 }
+
