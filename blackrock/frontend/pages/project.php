@@ -79,15 +79,6 @@ $followed_projects = $responseData['followers'];
         </li>
     <?php endforeach; ?>
 </ul>
-            <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
-                <?php foreach ($followed_projects as $follower): ?>
-                    <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
-                    <a href="profile.php?profile=<?php echo ($follower); ?>">
-                        <?php echo $follower; ?>
-                    </a>
-                </li>
-                <?php endforeach; ?>
-            </ul>
         </aside>
     </main>
     <?php include 'footer.php'; ?>
