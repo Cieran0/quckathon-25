@@ -80,6 +80,11 @@ $followed_projects = $responseData['followers'];
                     </li>
                 <?php endforeach; ?>
             </ul>
+
+            <button class="mt-6 w-full py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                Follow Project
+            </button>
+
         </aside>
     </main>
     <?php include 'footer.php'; ?>

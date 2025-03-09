@@ -179,9 +179,13 @@ if (!isset($_SESSION['session_token'])) {
             </div>
             
             <h3 class="text-xl font-semibold text-custom-green mb-2">Followed Projects</h3>
-            <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
+            <ul>
                 <?php foreach ($followedProjects as $project): ?>
-                    <li class="mb-1 text-gray-800"> <?php echo htmlspecialchars($project['name']); ?> </li>
+                    <li class="mb-1 text-gray-800">
+                        <a href="project.php?id=<?php echo $project['id']; ?>" class="text-white-500 hover:text-blue-700">
+                            <?php echo htmlspecialchars($project['name']); ?>
+                        </a>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         </div>
