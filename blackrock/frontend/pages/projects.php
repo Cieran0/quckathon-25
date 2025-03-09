@@ -199,16 +199,16 @@ curl_close($ch);
                     </div>
                 <?php else: ?>
                     <?php foreach ($projects as $project): ?>
-        <a href="/project.php?id=<?= htmlspecialchars($project['id']) ?>" class="block project-wrapper transition-all duration-300 ease-in-out">
-            <div class="project-card opacity-100 transform scale-100 transition-all duration-300 ease-in-out">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
-                <h3><?= htmlspecialchars($project['name']) ?></h3>
-                <p><?= htmlspecialchars($project['description']) ?></p>
-            </div>
-        </a>
-    <?php endforeach; ?>
+                        <a href="/project.php?id=<?= htmlspecialchars($project['id']) ?>" class="block project-wrapper transition-all duration-300 ease-in-out">
+                            <div class="project-card opacity-100 transform scale-100 transition-all duration-300 ease-in-out">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                </svg>
+                                <h3><?= htmlspecialchars($project['name']) ?></h3>
+                                <p><?= htmlspecialchars($project['description']) ?></p>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
                 <?php endif; ?>
 
                 <!-- Add Project card remains static -->
