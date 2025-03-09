@@ -151,3 +151,80 @@
     margin-bottom: 10px;
     color: #006844;
 }
+
+.custom-green {
+    background-color: #006844 !important;
+}
+
+.text-custom-green {
+    color: #006844 !important;
+}
+
+/* Project Card */
+.project-card {
+    background-color: #e0e0e0;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-card:hover {
+    background-color: #a9a9a9;
+}
+
+.project-card svg {
+    display: block;
+    margin: 0 auto 1rem auto;
+    width: 30px;
+    height: 30px;
+}
+
+.project-card h3 {
+    margin-top: 0;
+    font-size: 1rem;
+}
+
+.project-card p {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+/* New Folder Button (Custom Green) */
+.project-card.text-custom-green {
+    background-color: #006844;
+    color: white;
+}
+
+.project-card.text-custom-green:hover {
+    background-color: #00a169;
+}
+
+.project-card.text-custom-green svg {
+    color: white;
+}
+
+.project-card.text-custom-green h3 {
+    color: white;
+}
+
+.project-card.text-custom-green p {
+    color: #c0c0c0;
+}
+
+/* Modal */
+.omodal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Control visibility through the 'hidden' class */
+.omodal.hidden {
+    display: none;
+}
