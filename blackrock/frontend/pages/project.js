@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('folder-view');
         container.innerHTML = `
             <div class="flex items-center mb-4">
-                <input type="text" id="search-input" placeholder="Search..." 
+                <input type="text" id="search-input" placeholder="Search files..." 
                        class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300"
                        value="${currentSearchTerm}">
                 <button class="px-4 py-2 bg-green-600 rounded-r hover:bg-green-400 text-white">Search</button>
