@@ -121,6 +121,7 @@ type ProjectStructureResponse struct {
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
 	Folders     []*FolderResponse `json:"folders"`
+    Followers   []string          `json:"followers"`
 }
 
 func ViewProject(w http.ResponseWriter, r *http.Request) {
@@ -262,12 +263,31 @@ func ViewProject(w http.ResponseWriter, r *http.Request) {
         }
     }
 
+    follow_rows, err:= db.DB.Query(`SELECT u.username
+FROM users u
+JOIN user_projects up ON u.id = up.user_id
+WHERE up.project_id = $1
+`, req.ProjectID)
+
+    var followers []string
+
+    for follow_rows.Next() {
+        var username string
+        if err := follow_rows.Scan(&username); err != nil {
+            http.Error(w, "Failed to followers", http.StatusInternalServerError)
+            return
+        }
+        
+        followers = append(followers, username)
+    }
+
     // Construct the final response
     response := ProjectStructureResponse{
         ID:          proj.ID,
         Name:        proj.Name,
         Description: proj.Description,
-        Folders:     topLevelFolders, // topLevelFolders is already []*FolderResponse
+        Folders:     topLevelFolders,
+        Followers: followers,
     }
 
     // Send the JSON response

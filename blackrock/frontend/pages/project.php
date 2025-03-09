@@ -40,7 +40,7 @@ $rootData = $responseData['folders'][0] ?? [];
         const folderData = <?= json_encode($rootData) ?>;
         const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
         const projectId = <?= json_encode($id) ?>;
-        console.log(folderData);
+        console.log('<?= json_encode($response) ?>;');
     </script>
     <script src="project.js"></script>
 </head>

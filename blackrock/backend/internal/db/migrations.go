@@ -1,27 +1,30 @@
 package db
 
 import (
-    "log" 
-    "golang.org/x/crypto/bcrypt"
+	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
+// InitDatabaseTables creates all necessary tables, including new columns for volunteers and total funding in the projects table.
 func InitDatabaseTables() {
-    createProjectTable := `
+	createProjectTable := `
     CREATE TABLE IF NOT EXISTS projects(
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) UNIQUE NOT NULL,
         description TEXT,
+        volunteers INT DEFAULT 0,
+        total_funding NUMERIC(12,2) DEFAULT 0.00,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
     );
     `
-    _, err := DB.Exec(createProjectTable)
-    if err != nil {
-        log.Fatal("Failed to create projects table:", err)
-    }
-    log.Println("Created projects table")
+	_, err := DB.Exec(createProjectTable)
+	if err != nil {
+		log.Fatal("Failed to create projects table:", err)
+	}
+	log.Println("Created projects table")
 
-
-    createFoldersTable := `
+	createFoldersTable := `
     CREATE TABLE IF NOT EXISTS folders (
         id SERIAL PRIMARY KEY,
         project_id INT NOT NULL,
@@ -38,15 +41,13 @@ func InitDatabaseTables() {
             ON DELETE CASCADE
     );
     `
+	_, err = DB.Exec(createFoldersTable)
+	if err != nil {
+		log.Fatal("Failed to create folders table:", err)
+	}
+	log.Println("Created folders table")
 
-    _, err = DB.Exec(createFoldersTable)
-    if err != nil {
-        log.Fatal("Failed to create folders table:", err)
-    }
-    log.Println("Created folders table")
-
-
-    createFilesTable := `
+	createFilesTable := `
     CREATE TABLE IF NOT EXISTS files (
         id SERIAL PRIMARY KEY,
         folder_id INT NOT NULL,
@@ -58,14 +59,13 @@ func InitDatabaseTables() {
             ON DELETE CASCADE
     );
     `
-    _, err = DB.Exec(createFilesTable)
-    if err != nil {
-        log.Fatal("Error creating files table:", err)
-    }
-    log.Println("Created files table")
+	_, err = DB.Exec(createFilesTable)
+	if err != nil {
+		log.Fatal("Error creating files table:", err)
+	}
+	log.Println("Created files table")
 
-
-    createFileVersionsTable := `
+	createFileVersionsTable := `
     CREATE TABLE IF NOT EXISTS file_versions (
         id SERIAL PRIMARY KEY,
         file_id INT NOT NULL,
@@ -83,14 +83,13 @@ func InitDatabaseTables() {
         CONSTRAINT unique_file_version UNIQUE (file_id, version_number)
     );
     `
-    _, err = DB.Exec(createFileVersionsTable)
-    if err != nil {
-        log.Fatal("Failed to create file versions table:", err)
-    }
-    log.Println("Created file versions table")
+	_, err = DB.Exec(createFileVersionsTable)
+	if err != nil {
+		log.Fatal("Failed to create file versions table:", err)
+	}
+	log.Println("Created file versions table")
 
-
-    createUsersTable := `
+	createUsersTable := `
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) UNIQUE NOT NULL,
@@ -100,14 +99,13 @@ func InitDatabaseTables() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
     `
-    _, err = DB.Exec(createUsersTable)
-    if err != nil {
-        log.Fatal("Failed to create users table:", err)
-    }
-    log.Println("Created users table")
+	_, err = DB.Exec(createUsersTable)
+	if err != nil {
+		log.Fatal("Failed to create users table:", err)
+	}
+	log.Println("Created users table")
 
-
-    createUserProjectsTable := `
+	createUserProjectsTable := `
     CREATE TABLE IF NOT EXISTS user_projects (
         user_id INT NOT NULL,
         project_id INT NOT NULL,
@@ -123,51 +121,56 @@ func InitDatabaseTables() {
             ON DELETE CASCADE
     );
     `
-    _, err = DB.Exec(createUserProjectsTable)
-    if err != nil {
-        log.Fatal("Failed to create user projects table:", err)
-    }
-    log.Println("Created user projects table")
+	_, err = DB.Exec(createUserProjectsTable)
+	if err != nil {
+		log.Fatal("Failed to create user projects table:", err)
+	}
+	log.Println("Created user projects table")
 
-
-    createSessionTokensTable := `
+	createSessionTokensTable := `
     CREATE TABLE IF NOT EXISTS session_tokens (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    token VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP WITH TIME ZONE,
-    CONSTRAINT fk_user
-        FOREIGN KEY (user_id)
-        REFERENCES users (id)
-        ON DELETE CASCADE
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL,
+        token VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP WITH TIME ZONE,
+        CONSTRAINT fk_user
+            FOREIGN KEY (user_id)
+            REFERENCES users (id)
+            ON DELETE CASCADE
     );
     `
-    _, err = DB.Exec(createSessionTokensTable)
-    if err != nil {
-        log.Fatal("Failed to create sessiontokens table")
-    }
-    log.Println("Created session tokens table")
+	_, err = DB.Exec(createSessionTokensTable)
+	if err != nil {
+		log.Fatal("Failed to create session tokens table:", err)
+	}
+	log.Println("Created session tokens table")
 }
 
+// TempData inserts sample projects, folders, files, file versions, users, and user-project relationships.
+// The projects now include a number of volunteers and total funding values.
 func TempData() {
 	var projectIDs []int
 
+	// Updated projects data with volunteers and total funding values.
 	projects := []struct {
-		name, description string
+		name         string
+		description  string
+		volunteers   int
+		totalFunding float64
 	}{
-		{"Project Alpha", "Description for Project Alpha"},
-		{"Project Beta", "Description for Project Beta"},
-		{"Project Gamma", "Description for Project Gamma"},
-		{"Project Delta", "Description for Project Delta"},
-		{"Project Epsilon", "Description for Project Epsilon"},
+		{"Project Alpha", "Description for Project Alpha", 10, 1000.00},
+		{"Project Beta", "Description for Project Beta", 5, 500.00},
+		{"Project Gamma", "Description for Project Gamma", 15, 1500.00},
+		{"Project Delta", "Description for Project Delta", 8, 800.00},
+		{"Project Epsilon", "Description for Project Epsilon", 20, 2000.00},
 	}
 
 	for _, proj := range projects {
 		var projectID int
 		err := DB.QueryRow(
-			`INSERT INTO projects (name, description) VALUES ($1, $2) RETURNING id`,
-			proj.name, proj.description,
+			`INSERT INTO projects (name, description, volunteers, total_funding) VALUES ($1, $2, $3, $4) RETURNING id`,
+			proj.name, proj.description, proj.volunteers, proj.totalFunding,
 		).Scan(&projectID)
 		if err != nil {
 			log.Fatal("Failed to insert project:", err)
