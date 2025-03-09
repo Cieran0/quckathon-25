@@ -188,7 +188,7 @@ curl_close($ch);
 
         <section class="flex-grow p-4">
             <div class="flex items-center mb-4">
-                <input id="searchInput" type="text" placeholder="Search Projects..." class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300">
+                <input id="searchInput" type="text" placeholder="Search Projects..." class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-500">
                 <button id="searchButton" class="px-4 py-2 bg-green-600 rounded-r hover:bg-green-400 text-white">Search</button>
             </div>
 
@@ -199,12 +199,12 @@ curl_close($ch);
                     </div>
                 <?php else: ?>
                     <?php foreach ($projects as $project): ?>
-                        <a href="/project.php?id=<?= htmlspecialchars($project['id']) ?>" class="block project-wrapper transition-all duration-300 ease-in-out">
-                            <div class="project-card opacity-100 transform scale-100 transition-all duration-300 ease-in-out">
+                        <a href="/project.php?id=<?= htmlspecialchars($project['id']) ?>" class="block project-wrapper transition-all duration-500 ease-in-out">
+                            <div class="project-card opacity-100 transform scale-100 transition-all duration-500 ease-in-out">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
-                                <h3><?= htmlspecialchars($project['name']) ?></h3>
+                                <h3><?= htmlspecialchars($project['name']) ?></h3
                                 <p><?= htmlspecialchars($project['description']) ?></p>
                             </div>
                         </a>
@@ -297,7 +297,7 @@ document.getElementById('searchInput').addEventListener('input', function() {
             project.style.transform = "scale(0.9)";
             setTimeout(() => {
                 project.style.display = "none"; 
-            }, 300); 
+            }, 500); 
         }
     });
 });
