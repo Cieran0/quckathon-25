@@ -1,0 +1,153 @@
+/* Custom Green */
+.custom-green {
+    background-color: #006844 !important;
+}
+
+.text-custom-green {
+    color: #006844 !important;
+}
+
+/* Dark Gray */
+.dark-gray {
+    background-color: #333 !important;
+}
+
+/* Header Bottom Border */
+.header-bottom-border {
+    border-bottom: 2px solid #333;
+}
+
+/* Project Card */
+.project-card {
+    background-color: #e0e0e0;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-card:hover {
+    background-color: #a9a9a9;
+}
+
+.project-card svg {
+    display: block;
+    margin: 0 auto 1rem auto;
+    width: 30px;
+    height: 30px;
+}
+
+.project-card h3 {
+    margin-top: 0;
+    font-size: 1rem;
+}
+
+.project-card p {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+/* New Project Card */
+.new-project-card {
+    background-color: #006844;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-project-card:hover {
+    background-color: #00a169;
+}
+
+.new-project-card svg {
+    display: block;
+    margin: 0 auto 1rem auto;
+    width: 30px;
+    height: 30px;
+    color: white;
+}
+
+.new-project-card h3 {
+    margin-top: 0;
+    font-size: 1rem;
+    color: white;
+}
+
+.new-project-card p {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #c0c0c0;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+    max-width: 600px;
+}
+
+.close-modal {
+    float: right;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Drag-and-Drop Upload Area */
+.upload-area {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    color: #666;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.upload-area.dragover {
+    border-color: #006844;
+    background-color: #e6f7f2;
+}
+
+.upload-area svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+    color: #006844;
+}
