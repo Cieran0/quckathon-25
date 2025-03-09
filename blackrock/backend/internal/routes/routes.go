@@ -1,9 +1,9 @@
 package routes
 
 import (
-    "net/http"
-    
-    "backend/internal/handlers"
+	"net/http"
+
+	"backend/internal/handlers"
 )
 
 func RegisterRoute() http.Handler {
@@ -16,6 +16,7 @@ func RegisterRoute() http.Handler {
     mux.HandleFunc("/profile", handlers.GetProfile)
     mux.HandleFunc("/download", handlers.DownloadFile)
     mux.HandleFunc("/upload", handlers.UploadFile)
+    mux.HandleFunc("/new_project", handlers.NewProject)
 
     return mux
 }

@@ -53,6 +53,7 @@ curl_close($ch);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,15 +64,19 @@ curl_close($ch);
         .custom-green {
             background-color: #006844 !important;
         }
+
         .text-custom-green {
             color: #006844 !important;
         }
+
         .dark-gray {
             background-color: #333 !important;
         }
+
         .header-bottom-border {
             border-bottom: 2px solid #333;
         }
+
         .project-card {
             background-color: #e0e0e0;
             padding: 1rem;
@@ -79,13 +84,16 @@ curl_close($ch);
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         :hover.project-card {
             background-color: #a9a9a9;
         }
 
         .project-card svg {
-            display: block; /* Centers the SVG */
-            margin: 0 auto 1rem auto; /* Centers horizontally and adds bottom margin */
+            display: block;
+            /* Centers the SVG */
+            margin: 0 auto 1rem auto;
+            /* Centers horizontally and adds bottom margin */
             width: 30px;
             height: 30px;
         }
@@ -94,6 +102,7 @@ curl_close($ch);
             margin-top: 0;
             font-size: 1rem;
         }
+
         .project-card p {
             margin-top: 0.5rem;
             font-size: 0.875rem;
@@ -113,17 +122,21 @@ curl_close($ch);
         }
 
         .new-project-card svg {
-            display: block; /* Centers the SVG */
-            margin: 0 auto 1rem auto; /* Centers horizontally and adds bottom margin */
+            display: block;
+            /* Centers the SVG */
+            margin: 0 auto 1rem auto;
+            /* Centers horizontally and adds bottom margin */
             width: 30px;
             height: 30px;
             color: white;
         }
+
         .new-project-card h3 {
             margin-top: 0;
             font-size: 1rem;
             color: white;
         }
+
         .new-project-card p {
             margin-top: 0.5rem;
             font-size: 0.875rem;
@@ -131,8 +144,34 @@ curl_close($ch);
         }
     </style>
 </head>
+
 <body class="bg-white flex flex-col h-screen">
     <?php include 'header.php'; ?>
+
+    <!-- Modal -->
+    <div id="project-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg w-96">
+            <h2 class="text-xl font-bold mb-4">Create New Project</h2>
+            <form id="project-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="project-name">Project Name</label>
+                    <input type="text" id="project-name" name="name" required
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2" for="project-description">Description</label>
+                    <textarea id="project-description" name="description" rows="3"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <main class="flex flex-grow">
         <aside class="w-64 p-4 custom-green text-white">
@@ -140,8 +179,8 @@ curl_close($ch);
             <ul>
                 <?php foreach ($followed_projects as $project): ?>
                     <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
-    <?php echo htmlspecialchars($project['name']); ?>
-</li>
+                        <?php echo htmlspecialchars($project['name']); ?>
+                    </li>
 
                 <?php endforeach; ?>
             </ul>
@@ -149,7 +188,8 @@ curl_close($ch);
 
         <section class="flex-grow p-4">
             <div class="flex items-center mb-4">
-                <input type="text" placeholder="Search Projects..." class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300">
+                <input type="text" placeholder="Search Projects..."
+                    class="w-full px-4 py-2 rounded-l border border-r-0 bg-custom-green placeholder-gray-300">
                 <button class="px-4 py-2 bg-green-600 rounded-r hover:bg-green-400 text-white">Search</button>
             </div>
 
@@ -163,7 +203,8 @@ curl_close($ch);
                         <a href="/project.php?id=<?= htmlspecialchars($project['id']) ?>" class="block">
                             <div class="project-card">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
                                 <h3><?= htmlspecialchars($project['name']) ?></h3>
                                 <p><?= htmlspecialchars($project['description']) ?></p>
@@ -173,9 +214,9 @@ curl_close($ch);
                 <?php endif; ?>
 
                 <!-- Add Project card remains static -->
-                <div class="new-project-card">
+                <div class="new-project-card" onclick="openModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="white" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/>
+                        <path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z" />
                     </svg>
                     <h3>Add Project</h3>
                     <p>Create a new project</p>
@@ -190,5 +231,46 @@ curl_close($ch);
     </main>
 
     <?php include 'footer.php'; ?>
+
+    <script>
+
+        function openModal() {
+            document.getElementById('project-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').classList.add('hidden');
+            document.getElementById('project-form').reset();
+        }
+
+        document.getElementById('project-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                session_token: "<?php echo $_SESSION['session_token']; ?>",
+                name: document.getElementById('project-name').value,
+                desc: document.getElementById('project-description').value
+            };
+
+            fetch('http://192.168.0.7:8040/new_project', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                closeModal();
+                window.location.href = `/project.php?id=${data.project_id}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create project. Please try again.');
+            });
+        });
+    </script>
 </body>
+
 </html>
