@@ -4,6 +4,7 @@ import (
 	"backend/internal/db"
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 )
@@ -37,6 +38,9 @@ func Follow(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("Received follow request: %+v", req)
+
 
 	// Validate session token
 	var tokenUserID int

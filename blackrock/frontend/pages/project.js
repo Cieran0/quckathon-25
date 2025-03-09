@@ -40,6 +40,32 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFolderList();
     }
 
+    // Add follow button functionality
+    document.getElementById('follow-button').addEventListener('click', () => {
+        fetch('http://90.194.168.250:8040/follow', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_token: sessionToken,
+                id: projectId
+            })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Follow failed');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Project follow status updated successfully');
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update follow status');
+        });
+    });
+
     function updateFolderList() {
     const folderList = document.getElementById('folder-list');
     folderList.innerHTML = ''; // Clear current list
