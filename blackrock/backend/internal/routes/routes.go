@@ -18,6 +18,7 @@ func RegisterRoute() http.Handler {
     mux.HandleFunc("/upload", handlers.UploadFile)
     mux.HandleFunc("/new_project", handlers.NewProject)
     mux.HandleFunc("/new_folder", handlers.NewFolder)
+    mux.HandleFunc("/analytics", handlers.Analytics)
 
     return mux
 }

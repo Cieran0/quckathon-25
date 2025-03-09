@@ -39,6 +39,12 @@ $followed_projects = $responseData['followers'];
     <title>Folders and Files</title>
     <link href="tailwind.min.css" rel="stylesheet">
     <link href="project-style.css" rel="stylesheet">
+    <script>
+        const folderData = <?= json_encode($rootData) ?>;
+        const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
+        const projectId = <?= json_encode($id) ?>;
+        console.log('<?= json_encode($response) ?>;');
+    </script>
     <script src="project.js"></script>
 </head>
 <body class="bg-white flex flex-col h-screen">

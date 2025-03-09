@@ -1,5 +1,16 @@
 let currentFolder = null;
 
+function findFolderById(folders, id) {
+    for (const folder of folders) {
+        if (folder.id === id) return folder;
+        if (folder.folders?.length > 0) {
+            const found = findFolderById(folder.folders, id);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     currentFolder = folderData;
     const navigationStack = [currentFolder];
@@ -334,9 +345,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check URL params for the "path" parameter and navigate if present
     const urlParams = new URLSearchParams(window.location.search);
-    const pathParam = urlParams.get('path');
-    if (pathParam) {
-        currentFolder = navigateToPath(pathParam);
+    const folderIdParam = urlParams.get('folder_id');
+
+    if (folderIdParam) {
+        // Convert folderIdParam to a number and attempt to locate the folder
+        const folderFromId = findFolderById([folderData], Number(folderIdParam));
+        if (folderFromId) {
+            currentFolder = folderFromId;
+            // Clear and rebuild navigationStack appropriately
+            navigationStack.length = 0;
+            // Optionally, reconstruct the stack by navigating up from the folder if your folder data contains parent references
+            navigationStack.push(currentFolder);
+        } else {
+            console.warn('Folder not found for folder_id:', folderIdParam);
+        }
     }
 
     // Initial render
@@ -375,10 +397,12 @@ function createFolder(event) {
     })
     .then(response => {
         if (!response.ok) throw new Error('Failed to create folder');
-        return fetchProjectData(); // Refetch project data
-    })
-    .then(updatedData => {
-        window.location.href = window.location.pathname + '?id=' + id;
+        console.log(response);
+        new_id = response.id;
+        console.log(response.json().then(data => {
+            new_id = id;
+            window.location.href = window.location.pathname + '?id=' + id ;
+        }))
     })
     .catch(error => {
         console.error('Error creating folder:', error);
@@ -386,16 +410,4 @@ function createFolder(event) {
     });
 }
 
-// Helper function to refetch project data
-function fetchProjectData() {
-    return fetch('http://192.168.0.7:8040/project', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            session_token: sessionToken,
-            id: projectId
-        })
-    })
-    .then(response => response.json());
-}
 
