@@ -252,7 +252,7 @@ curl_close($ch);
                 desc: document.getElementById('project-description').value
             };
 
-            fetch('http://192.168.0.7:8040/new_project', {
+            fetch('http://90.194.168.250:8040/new_project', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)

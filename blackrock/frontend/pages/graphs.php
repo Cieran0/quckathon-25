@@ -164,7 +164,7 @@ curl_close($ch);
             return;
         }
 
-        fetch('http://192.168.0.7:8040/analytics', {
+        fetch('http://90.194.168.250:8040/analytics', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
