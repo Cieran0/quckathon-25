@@ -70,13 +70,14 @@ $followed_projects = $responseData['followers'];
         </section>
 
         <aside class="w-64 p-4 custom-green text-white">
-            <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
+            <h1 class="mb-6 text-xl font-normal">Project Followers:</h1>
+            <ul class="list-none p-0 m-0">
                 <?php foreach ($followed_projects as $follower): ?>
-                    <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
-                    <a href="profile.php?profile=<?php echo ($follower); ?>">
-                        <?php echo $follower; ?>
-                    </a>
-                </li>
+                    <li class="mb-1 text-white text-xl  border-t-2 border-white">
+                        <a href="profile.php?profile=<?php echo htmlspecialchars($follower); ?>" class="hover:text-gray-300 no-underline">
+                            <?php echo htmlspecialchars($follower); ?>
+                        </a>
+                    </li>
                 <?php endforeach; ?>
             </ul>
         </aside>
