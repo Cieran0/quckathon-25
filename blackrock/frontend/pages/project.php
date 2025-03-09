@@ -79,8 +79,8 @@ $followed_projects = $responseData['followers'];
         <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
     <?php foreach ($followed_projects as $follower): ?>
         <li class="mb-1 text-gray-800 bg-transparent">
-            <a href="profile.php?profile=<?php echo htmlspecialchars($follower['id']); ?>" class="text-gray-800 no-underline bg-transparent">
-                <?php echo htmlspecialchars($follower['name']); ?>
+            <a href="profile.php?profile=<?php echo htmlspecialchars($follower); ?>" class="text-gray-800 no-underline bg-transparent">
+                <?php echo htmlspecialchars($follower); ?>
             </a>
         </li>
     <?php endforeach; ?>
