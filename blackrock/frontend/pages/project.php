@@ -39,12 +39,6 @@ $followed_projects = $responseData['followers'];
     <title>Folders and Files</title>
     <link href="tailwind.min.css" rel="stylesheet">
     <link href="project-style.css" rel="stylesheet">
-    <script>
-        const folderData = <?= json_encode($rootData) ?>;
-        const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
-        const projectId = <?= json_encode($id) ?>;
-        console.log('<?= json_encode($response) ?>;');
-    </script>
     <script src="project.js"></script>
 </head>
 <body class="bg-white flex flex-col h-screen">
@@ -85,6 +79,15 @@ $followed_projects = $responseData['followers'];
         </li>
     <?php endforeach; ?>
 </ul>
+            <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
+                <?php foreach ($followed_projects as $follower): ?>
+                    <li class="text-white hover:text-gray-300 cursor-pointer mb-4 pt-2 border-t-2 border-white">
+                    <a href="profile.php?profile=<?php echo ($follower); ?>">
+                        <?php echo $follower; ?>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+            </ul>
         </aside>
     </main>
     <?php include 'footer.php'; ?>
