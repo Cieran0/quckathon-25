@@ -1,12 +1,12 @@
 package handlers
 
 import (
-    "net/http"
-    "log"
-    "database/sql"
-    "encoding/json"
-    "backend/internal/db"
-    "time"
+	"backend/internal/db"
+	"database/sql"
+	"encoding/json"
+	"log"
+	"net/http"
+	"time"
 )
 
 type GetProjectsRequest struct {
@@ -124,10 +124,19 @@ type ProjectStructureResponse struct {
 }
 
 func ViewProject(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodOptions {
+        setCORSHeaders(w)
+        w.WriteHeader(http.StatusOK)
+        return
+    }
+	
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	setCORSHeaders(w);
 
 	var req ViewProjectRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

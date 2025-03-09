@@ -1,5 +1,7 @@
+let currentFolder = null;
+
 document.addEventListener('DOMContentLoaded', () => {
-    let currentFolder = folderData;
+    currentFolder = folderData;
     const navigationStack = [currentFolder];
     let currentSearchTerm = '';
 
@@ -17,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `<button onclick="goBack()" class="px-4 py-2 mb-4 bg-green-600 rounded hover:bg-green-400 text-white">Back</button>` : ''}
             <div class="grid grid-cols-4 gap-4">${renderItems(folder, currentSearchTerm)}</div>
         `;
-
         // Focus on the search input and place the cursor at the end
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Render individual folders and files
+    // Render individual folders, files, and the "New Folder" button
     function renderItems(folder, searchTerm) {
         const filteredFolders = folder.folders.filter(f => 
             f.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,11 +38,23 @@ document.addEventListener('DOMContentLoaded', () => {
             file.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
+        // Add the "New Folder" button as the first item in the grid
+        const newFolderButton = `
+            <div class="project-card cursor-pointer text-custom-green bg-custom-green hover:bg-green-700" onclick="showCreateFolderPrompt()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <h3 class="text-white">Add Folder</h3>
+                <p class="text-gray-300">Create a new folder</p>
+            </div>
+        `;
+
         if (filteredFolders.length === 0 && filteredFiles.length === 0) {
-            return `<div class="col-span-4 text-red-500 text-center">No results found</div>`;
+            return `<div class="col-span-4 text-red-500 text-center">No results found</div>${newFolderButton}`;
         }
 
         return `
+            ${newFolderButton}
             ${filteredFolders.map(f => `
                 <div class="project-card cursor-pointer" onclick="openFolder(${f.id})">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return null;
         };
-
         const newFolder = findFolderById([folderData], folderId);
         if (newFolder) {
             currentSearchTerm = ''; // Clear search when navigating
@@ -110,12 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('file-modal');
         const fileDetails = document.getElementById('file-details');
         const fileName = document.getElementById('file-name');
-
         // Reset modal content
         fileName.innerText = 'Loading...';
         fileDetails.innerHTML = '<div class="loading-spinner"></div>';
         modal.style.display = 'block';
-
         // Fetch file details from the server
         fetch('http://192.168.0.7:8040/file', {
             method: 'POST',
@@ -218,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('folder_id', currentFolder.id);
             formData.append('project_id', projectId);
             formData.append('mime_type', file.type);
-
             // Show loading feedback
             uploadArea.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="animate-spin h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24">
@@ -227,18 +236,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </svg>
                 <p>Uploading...</p>
             `;
-
             // Send the file to the backend
             const response = await fetch('http://192.168.0.7:8040/upload', {
                 method: 'POST',
                 body: formData,
             });
-
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Upload failed with status ${response.status}: ${errorText}`);
             }
-
             const result = await response.json();
             alert(`Upload successful! File ID: ${result.file_id}, Version: ${result.version_number}`);
             window.location.reload();
@@ -256,6 +262,72 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Open the folder name modal
+    window.showCreateFolderPrompt = () => {
+        const modal = document.getElementById('folder-name-modal');
+        modal.classList.remove('hidden');
+        console.log(modal.classList)
+    };
+
+    // Close the folder name modal
+    window.closeFolderNameModal = () => {
+        const modal = document.getElementById('folder-name-modal');
+        modal.classList.add('hidden');
+    };
+
+    
+
     // Initial render
     renderFolder(currentFolder);
 });
+
+// Handle folder creation form submission
+function createFolder(event) {
+    event.preventDefault(); // Prevent default form submission
+    const folderNameInput = document.getElementById('folder-name-input');
+    const folderName = folderNameInput.value.trim();
+    if (!folderName) {
+        alert('Please enter a valid folder name.');
+        return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    const id = Number(params.get('id'));
+
+    // Send request to create the folder
+    fetch('http://192.168.0.7:8040/new_folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            project_id: id,
+            session_token: sessionToken,
+            parent_id: Number(currentFolder.id),
+            name: folderName
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to create folder');
+        return fetchProjectData(); // Refetch project data
+    })
+    .then(updatedData => {
+        window.location.href = window.location.pathname + '?id=' + id;
+    })
+    .catch(error => {
+        console.error('Error creating folder:', error);
+        alert('Failed to create folder.');
+    });
+}
+
+// Helper function to refetch project data
+function fetchProjectData() {
+    return fetch('http://192.168.0.7:8040/project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            session_token: sessionToken,
+            id: projectId
+        })
+    })
+    .then(response => response.json());
+}
