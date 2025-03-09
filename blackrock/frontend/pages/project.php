@@ -27,6 +27,7 @@ curl_close($ch);
 
 $responseData = json_decode($response, true);
 $rootData = $responseData['folders'][0] ?? [];
+$followed_projects = $responseData['followers'];
 
 
 ?>
@@ -38,11 +39,6 @@ $rootData = $responseData['folders'][0] ?? [];
     <title>Folders and Files</title>
     <link href="tailwind.min.css" rel="stylesheet">
     <link href="project-style.css" rel="stylesheet">
-    <script>
-        const folderData = <?= json_encode($rootData) ?>;
-        const sessionToken = "<?php echo $_SESSION['session_token']; ?>";
-        const projectId = <?= json_encode($id) ?>;
-    </script>
     <script src="project.js"></script>
 </head>
 <body class="bg-white flex flex-col h-screen">
@@ -74,7 +70,15 @@ $rootData = $responseData['folders'][0] ?? [];
         </section>
 
         <aside class="w-64 p-4 custom-green text-white">
-            <!-- Filters aside remains the same -->
+        <ul class="list-disc list-inside bg-gray-200 p-4 rounded">
+    <?php foreach ($followed_projects as $follower): ?>
+        <li class="mb-1 text-gray-800">
+            <a href="profile.php?profile=<?php echo htmlspecialchars($follower); ?>">
+                <?php echo htmlspecialchars($follower); ?>
+            </a>
+        </li>
+    <?php endforeach; ?>
+</ul>
         </aside>
     </main>
     <?php include 'footer.php'; ?>
