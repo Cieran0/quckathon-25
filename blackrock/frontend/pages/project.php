@@ -48,11 +48,7 @@ $rootData = $responseData['folders'][0] ?? [];
     <?php include 'header.php'; ?>
     <main class="flex flex-grow">
         <aside class="w-64 p-4 custom-green text-white">
-            <h2 class="text-lg mb-2">Favourite Folders</h2>
-            <ul>
-                <li class="mb-2"><a href="#" class="text-white hover:text-gray-300">Folder 1</a></li>
-                <li><a href="#" class="text-white hover:text-gray-300">Folder 2</a></li>
-            </ul>
+            <!---------------argh! -->
         </aside>
 
         <section class="flex-grow p-4">
